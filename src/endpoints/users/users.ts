@@ -122,6 +122,7 @@ export const getUserByIdEndpoint = new Endpoint({
 // });
 
 //Update User For Admin
+
 export const updateUserForAdminEndpoint = new Endpoint({
   path: "/userForAdmin/:id",
   method: EndpointMethod.PUT,

@@ -239,9 +239,8 @@ export const getAllUsersHandler = async () => {
       profilePic: row.profilePic,
       roleId: row.roleId,
       roleName: row.roleName ?? "No Role Assigned", // ✅ Ensures roleName is included
-      accountStatus: row.accountStatus,
-      jobRoles: row.jobRoles || [] // ✅ Ensures jobRoles is always an array
-    }));
+      accountStatus: row.accountStatus
+}));
 
     return users;
   } catch (error) {
@@ -282,13 +281,7 @@ export const getUserByIdHandler = async (id: string) => {
       profilePic: rows[0].profilePic,
       roleId: rows[0].roleId,
       roleName: rows[0].roleName,
-      accountStatus: rows[0].accountStatus,
-      savedJobs: rows
-        .filter((row: any) => row.jobId && row.jobRole) // ✅ Ensure only valid jobs are added
-        .map((row: any) => ({
-          id: row.jobId,
-          title: row.jobRole // ✅ Changed jobTitle → jobRole (to match SQL query)
-        }))
+      accountStatus: rows[0].accountStatus
     };
 
     return userData;

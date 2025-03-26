@@ -21,16 +21,10 @@ VALUES
       u.roleId,
       r.id,
       r.name AS roleName, 
-      u.accountStatus,
-      usj.jobId,
-      jb.jobRole
+      u.accountStatus
     FROM \`${process.env.PROJECT_ID}.${process.env.DATASET_ID}.${process.env.TABLE_USER}\` u
     LEFT JOIN \`${process.env.PROJECT_ID}.${process.env.DATASET_ID}.${process.env.TABLE_ROLE}\` r
       ON u.roleId = r.id
-    LEFT JOIN \`${process.env.PROJECT_ID}.${process.env.DATASET_ID}.${process.env.TABLE_USERSAVEDJOBBOARD}\` usj
-      ON u.id = usj.userId
-    LEFT JOIN \`${process.env.PROJECT_ID}.${process.env.DATASET_ID}.${process.env.TABLE_JOBBOARD}\` jb
-      ON usj.jobId = jb.id
     ORDER BY u.id;
   `,
 
@@ -49,19 +43,9 @@ VALUES
     u.roleId,
     r.name AS roleName, 
     u.accountStatus,
-    ARRAY_AGG(
-      STRUCT(
-        usj.jobId AS jobId,
-        jb.jobRole AS jobRole
-      )
-    ) AS jobRoles
   FROM \`${process.env.PROJECT_ID}.${process.env.DATASET_ID}.${process.env.TABLE_USER}\` u
   LEFT JOIN \`${process.env.PROJECT_ID}.${process.env.DATASET_ID}.${process.env.TABLE_ROLE}\` r
     ON u.roleId = r.id
-  LEFT JOIN \`${process.env.PROJECT_ID}.${process.env.DATASET_ID}.${process.env.TABLE_USERSAVEDJOBBOARD}\` usj
-    ON u.id = usj.userId
-  LEFT JOIN \`${process.env.PROJECT_ID}.${process.env.DATASET_ID}.${process.env.TABLE_JOBBOARD}\` jb
-    ON usj.jobId = jb.id
   WHERE u.id = @id
   GROUP BY u.id, u.firstName, u.lastName, u.email, u.phoneNumber,
            u.dateOfBirth, u.dateOfJoining, u.address,

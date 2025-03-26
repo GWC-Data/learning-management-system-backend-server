@@ -26,7 +26,6 @@ export declare const getAllUsersHandler: () => Promise<{
     roleId: any;
     roleName: any;
     accountStatus: any;
-    jobRoles: any;
 }[]>;
 export declare const getUserByIdHandler: (id: string) => Promise<{
     id: any;
@@ -42,10 +41,6 @@ export declare const getUserByIdHandler: (id: string) => Promise<{
     roleId: any;
     roleName: any;
     accountStatus: any;
-    savedJobs: {
-        id: any;
-        title: any;
-    }[];
 }>;
 export declare const updateUserForAdminHandler: (req: any, userId: string, updatedData: Partial<User>) => Promise<{
     id: string;
