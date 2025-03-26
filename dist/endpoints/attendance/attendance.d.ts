@@ -1,0 +1,11 @@
+import { Endpoint, EndpointAuthType } from 'node-server-engine';
+export declare const createAttendanceFileEndpoint: Endpoint<EndpointAuthType.JWT>;
+export declare const getAllAttendanceFileEndpoint: Endpoint<EndpointAuthType.JWT>;
+export declare const getAttendanceFileByIdEndpoint: Endpoint<EndpointAuthType.JWT>;
+export declare const getAttendanceFilesByClassIdEndpoint: Endpoint<EndpointAuthType.JWT>;
+export declare const updateAttendanceFileByIdEndpoint: Endpoint<EndpointAuthType.NONE>;
+export declare const deleteAttendanceFileEndpoint: Endpoint<EndpointAuthType.JWT>;
+export declare const createAttendanceEndpoint: Endpoint<EndpointAuthType.JWT>;
+export declare const getAllAttendanceEndpoint: Endpoint<EndpointAuthType.JWT>;
+export declare const getAttendanceEndpoint: Endpoint<EndpointAuthType.JWT>;
+export declare const deleteAttendanceEndpoint: Endpoint<EndpointAuthType.JWT>;

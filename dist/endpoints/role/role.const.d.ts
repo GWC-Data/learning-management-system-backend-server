@@ -1,0 +1,10 @@
+export declare const ROLE_NOT_FOUND = "Role not found";
+export declare const ROLE_CREATION_ERROR = "Error creating role";
+export declare const ROLE_UPDATE_ERROR = "Error updating role";
+export declare const ROLE_DELETE_ERROR = "Error deleting role";
+export declare const ROLE_GET_ERROR = "Error fetching roles";
+export declare const PERMISSION_NOT_FOUND = "Permission not found";
+export declare const PERMISSION_GET_ERROR = "Error getting permissions";
+export declare const PERMISSION_CREATION_ERROR = "Error creating permission";
+export declare const PERMISSION_UPDATE_ERROR = "Error updating permission";
+export declare const PERMISSION_DELETE_ERROR = "Error deleting permission";

@@ -1,0 +1,1 @@
+{"version":3,"file":"Permission.js","names":[],"sources":["../../../src/db/models/Permission.ts"],"sourcesContent":["export interface Permission {\r\n  id?: string;\r\n  action: string;\r\n  groupName: string;\r\n  description: string;\r\n  createdBy?: string;\r\n  updatedBy?: string;\r\n  createdAt?: string;\r\n  updateAt?: string;\r\n}"],"mappings":"","ignoreList":[]}

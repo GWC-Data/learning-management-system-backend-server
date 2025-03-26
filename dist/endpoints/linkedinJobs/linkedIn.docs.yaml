@@ -1,0 +1,17 @@
+/linkedinJobs:
+  get:
+    summary: Get all linkedinJobs
+    description: Fetches linkedinJobs.
+    operationId: getLinkedinJobs
+    tags:
+      - LinkedIn
+    parameters: []
+    responses:
+      '200':
+        description: linkedinJobs
+        content:
+          application/json:
+            schema:
+              type: array
+      '500':
+        description: Internal server error

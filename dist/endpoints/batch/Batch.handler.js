@@ -1,0 +1,686 @@
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.updateBatchesHandler = exports.getBatchIdsByTraineeIdHandler = exports.getBatchDetailsHandler = exports.getBatchByBatchNameHandler = exports.getAllBatchesHandler = exports.deleteBatchHandler = exports.createBatchTable = void 0;
+var _bigquery = require("../../config/bigquery");
+var _uuid = require("uuid");
+var _batch = require("../../queries/batch/batch.queries");
+var _batchTrainee = require("../../queries/batchTrainee/batchTrainee.queries");
+var _audit = require("../../queries/audit/audit.queries");
+// Function to check if the batch table exists
+const checkBatchTableExists = async () => {
+  try {
+    const [rows] = await _bigquery.bigquery.query({
+      query: `
+        SELECT table_name 
+        FROM \`teqcertify.lms.INFORMATION_SCHEMA.TABLES\` 
+        WHERE table_name = 'batches'
+      `
+    });
+    return rows.length > 0;
+  } catch (error) {
+    console.error("Error checking table existence:", error);
+    throw error;
+  }
+};
+
+// Function to create the batch table if it does not exist
+const createBatchTableIfNotExists = async () => {
+  const exists = await checkBatchTableExists();
+  if (!exists) {
+    try {
+      await _bigquery.bigquery.query({
+        query: `
+          CREATE TABLE \`teqcertify.lms.batches\` (
+            id STRING NOT NULL, 
+            courseId STRING NOT NULL,
+            batchName STRING NOT NULL,
+            startDate DATE NOT NULL,
+            endDate DATE NOT NULL,
+            createdBy STRING NOT NULL,
+            updatedBy STRING,
+            createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+          )
+        `
+      });
+      console.log("Batch table created successfully.");
+    } catch (error) {
+      console.error("Error creating Batch table:", error);
+      throw error;
+    }
+  }
+};
+
+// Function to check if the batchTrainee table exists
+const checkBatchTraineeTableExists = async () => {
+  try {
+    const [rows] = await _bigquery.bigquery.query({
+      query: `
+        SELECT table_name 
+        FROM \`teqcertify.lms.INFORMATION_SCHEMA.TABLES\` 
+        WHERE table_name = 'batchTrainees'
+      `
+    });
+    return rows.length > 0;
+  } catch (error) {
+    console.error("Error checking table existence:", error);
+    throw error;
+  }
+};
+const createBatchTraineeTableIfNotExists = async () => {
+  const exists = await checkBatchTraineeTableExists();
+  if (!exists) {
+    try {
+      await _bigquery.bigquery.query({
+        query: `
+          CREATE TABLE \`teqcertify.lms.batchTrainees\` (
+            batchId STRING NOT NULL,
+            traineeId STRING NOT NULL,
+            createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+          )
+        `
+      });
+      console.log("BatchTrainee table created successfully.");
+    } catch (error) {
+      console.error("Error creating BatchTrainee table:", error);
+      throw error;
+    }
+  }
+};
+
+//create batch table
+// export const createBatchTable = async (req: any, batch: Batch) => {
+//   await createBatchTableIfNotExists();
+//   await createBatchTraineeTableIfNotExists();
+
+//   const { courseId, batchName, traineeIds, startDate, endDate } = batch;
+//   const batchId = uuidv4();
+//   const { user } = req;
+
+//   try {
+//     // Step 1: Validate Course Existence
+//     const [courseExists] = await bigquery.query({
+//       query: `
+//         SELECT id FROM \`${process.env.PROJECT_ID}.${process.env.DATASET_ID}.${process.env.TABLE_COURSE}\`
+//         WHERE id = @courseId`,
+//       params: { courseId },
+//     });
+
+//     if (courseExists.length === 0) {
+//       throw new Error(`Course with ID ${courseId} not found.`);
+//     }
+
+//     // Step 2: Validate Trainees
+//     let matchedTraineeIds: string[] = [];
+//     if (traineeIds.length > 0) {
+//       const [traineeResults] = await bigquery.query({
+//         query: `
+//           SELECT id FROM \`${process.env.PROJECT_ID}.${process.env.DATASET_ID}.${process.env.TABLE_USER}\`
+//           WHERE id IN UNNEST(@traineeIds)`,
+//         params: { traineeIds },
+//       });
+
+//       matchedTraineeIds = traineeResults.map((row: any) => row.id);
+
+//       if (matchedTraineeIds.length !== traineeIds.length) {
+//         const missingTraineeIds = traineeIds.filter(
+//           (id) => !matchedTraineeIds.includes(id)
+//         );
+//         throw new Error(
+//           `Some trainees were not found: ${missingTraineeIds.join(", ")}`
+//         );
+//       }
+//     }
+
+//     // Step 3: Insert Batch Data
+//     await bigquery.query({
+//       query: batchQueries.createBatch,
+//       params: {
+//         id: batchId,
+//         courseId,
+//         batchName,
+//         startDate,
+//         endDate,
+//         createdBy: user?.id,
+//         createdAt: new Date().toISOString(),
+//       },
+//     });
+//     console.log("Batch created successfully:", batchId);
+
+//     // Step 4: Bulk Insert Batch-Trainee Mappings
+//     if (matchedTraineeIds.length > 0) {
+//       const batchTraineeInsertData = matchedTraineeIds.map((traineeId) => ({
+//         batchId,
+//         traineeId,
+//       }));
+
+//       await bigquery.query({
+//         query: `
+//       INSERT INTO \`${process.env.PROJECT_ID}.${process.env.DATASET_ID}.${process.env.TABLE_BATCH_TRAINEE}\`
+//       (batchId, traineeId, createdAt, updatedAt)
+//       SELECT
+//         batchId,
+//         traineeId,
+//         TIMESTAMP(createdAt) AS createdAt,
+//         TIMESTAMP(updatedAt) AS updatedAt
+//       FROM UNNEST(@batchTraineeInsertData) AS batchTraineeInsertData
+//       WHERE NOT EXISTS (
+//         SELECT 1
+//         FROM \`${process.env.PROJECT_ID}.${process.env.DATASET_ID}.${process.env.TABLE_BATCH_TRAINEE}\` bt
+//         WHERE bt.batchId = @batchId AND bt.traineeId = batchTraineeInsertData.traineeId
+//       )`,
+//         params: {
+//           batchTraineeInsertData,
+//           batchId,
+//           createdAt: new Date().toISOString(),
+//           updatedAt: new Date().toISOString(),
+//         },
+//       });
+
+//       console.log("Batch-Trainee linked successfully.");
+
+//        // **Step 6: Audit Log for Batch-Trainee Mapping**
+//        await bigquery.query({
+//         query: auditQueries.insertAuditLog,
+//         params: {
+//           id: uuidv4(),
+//           entityType: "Batch",
+//           entityId: batchId,
+//           action: "CREATE",
+//           previousData: null,
+//           newData: JSON.stringify(matchedTraineeIds),
+//           performedBy: user?.id,
+//           createdAt: new Date().toISOString(),
+//         },
+//         types: {
+//           previousData: 'STRING',
+//           newData: 'STRING',
+//         }
+//       });
+//       console.log("Audit log inserted for batch-trainee linking.");
+//     }
+
+//     return { id: batchId, ...batch, traineeIds };
+//   } catch (error: any) {
+//     console.error("Error creating Batch:", error.message, error);
+//     throw new Error(`Batch creation failed: ${error.message}`);
+//   }
+// };
+
+const createBatchTable = async (req, batch) => {
+  await createBatchTableIfNotExists();
+  await createBatchTraineeTableIfNotExists();
+  const {
+    courseId,
+    batchName,
+    traineeIds,
+    startDate,
+    endDate
+  } = batch;
+  const batchId = (0, _uuid.v4)();
+  const {
+    user
+  } = req;
+  const currentTimestamp = new Date().toISOString();
+  try {
+    // Step 1: Validate Course Existence
+    const [courseExists] = await _bigquery.bigquery.query({
+      query: `
+        SELECT id FROM \`${process.env.PROJECT_ID}.${process.env.DATASET_ID}.${process.env.TABLE_COURSE}\`
+        WHERE id = @courseId`,
+      params: {
+        courseId
+      }
+    });
+    if (courseExists.length === 0) {
+      throw new Error(`Course with ID ${courseId} not found.`);
+    }
+
+    // Step 2: Validate Trainees
+    let matchedTraineeIds = [];
+    if (traineeIds.length > 0) {
+      const [traineeResults] = await _bigquery.bigquery.query({
+        query: `
+          SELECT id FROM \`${process.env.PROJECT_ID}.${process.env.DATASET_ID}.${process.env.TABLE_USER}\`
+          WHERE id IN UNNEST(@traineeIds)`,
+        params: {
+          traineeIds
+        }
+      });
+      matchedTraineeIds = traineeResults.map(row => row.id);
+      if (matchedTraineeIds.length !== traineeIds.length) {
+        const missingTraineeIds = traineeIds.filter(id => !matchedTraineeIds.includes(id));
+        throw new Error(`Some trainees were not found: ${missingTraineeIds.join(", ")}`);
+      }
+    }
+
+    // Step 3: Insert Batch Data
+    await _bigquery.bigquery.query({
+      query: `
+        INSERT INTO \`${process.env.PROJECT_ID}.${process.env.DATASET_ID}.${process.env.TABLE_BATCH}\`
+         (id, courseId, batchName, startDate, endDate, createdBy, createdAt)
+        VALUES (@id, @courseId, @batchName, @startDate, @endDate, @createdBy, TIMESTAMP(@createdAt))
+      `,
+      params: {
+        id: batchId,
+        courseId,
+        batchName,
+        startDate,
+        endDate,
+        createdBy: user?.id,
+        createdAt: currentTimestamp
+      }
+    });
+    console.log("Batch created successfully:", batchId);
+
+    // Step 4: Bulk Insert Batch-Trainee Mappings
+    if (matchedTraineeIds.length > 0) {
+      const batchTraineeInsertData = matchedTraineeIds.map(traineeId => ({
+        batchId,
+        traineeId
+      }));
+      await _bigquery.bigquery.query({
+        query: `
+          INSERT INTO \`${process.env.PROJECT_ID}.${process.env.DATASET_ID}.${process.env.TABLE_BATCH_TRAINEE}\`
+          (batchId, traineeId, createdAt, updatedAt)
+          SELECT
+            batchTraineeData.batchId,
+            batchTraineeData.traineeId,
+            TIMESTAMP(@timestamp) AS createdAt,
+            TIMESTAMP(@timestamp) AS updatedAt
+          FROM UNNEST(@batchTraineeInsertData) AS batchTraineeData
+          WHERE NOT EXISTS (
+            SELECT 1
+            FROM \`${process.env.PROJECT_ID}.${process.env.DATASET_ID}.${process.env.TABLE_BATCH_TRAINEE}\` bt
+            WHERE bt.batchId = @batchId AND bt.traineeId = batchTraineeData.traineeId
+          )`,
+        params: {
+          batchTraineeInsertData,
+          batchId,
+          timestamp: currentTimestamp
+        }
+      });
+      console.log("Batch-Trainee linked successfully.");
+
+      // Step 6: Audit Log for Batch-Trainee Mapping
+      await _bigquery.bigquery.query({
+        query: _audit.auditQueries.insertAuditLog,
+        params: {
+          id: (0, _uuid.v4)(),
+          entityType: "Batch",
+          entityId: batchId,
+          action: "CREATE",
+          previousData: null,
+          newData: JSON.stringify(matchedTraineeIds),
+          performedBy: user?.id,
+          createdAt: currentTimestamp
+        },
+        types: {
+          previousData: 'STRING',
+          newData: 'STRING'
+        }
+      });
+      console.log("Audit log inserted for batch-trainee linking.");
+    }
+    return {
+      id: batchId,
+      ...batch,
+      traineeIds
+    };
+  } catch (error) {
+    console.error("Error creating Batch:", error.message, error);
+    throw new Error(`Batch creation failed: ${error.message}`);
+  }
+};
+
+//getall Batches
+exports.createBatchTable = createBatchTable;
+const getAllBatchesHandler = async () => {
+  try {
+    const [rows] = await _bigquery.bigquery.query({
+      query: _batch.batchQueries.getBatches
+    });
+    const batchMap = new Map();
+    rows.forEach(row => {
+      const {
+        batchId,
+        batchCourseId,
+        batchName,
+        batchStartDate,
+        batchEndDate,
+        traineeId,
+        traineeFirstName,
+        traineeLastName,
+        courseName,
+        courseImg,
+        courseLink
+      } = row;
+      if (!batchMap.has(batchId)) {
+        batchMap.set(batchId, {
+          id: batchId,
+          course: batchCourseId ? {
+            id: batchCourseId,
+            courseName,
+            courseImg,
+            courseLink
+          } : null,
+          batchName,
+          startDate: batchStartDate,
+          endDate: batchEndDate,
+          trainees: []
+        });
+      }
+
+      // Add trainees if they exist
+      if (traineeId) {
+        batchMap.get(batchId).trainees.push({
+          id: traineeId,
+          firstName: traineeFirstName,
+          lastName: traineeLastName
+        });
+      }
+    });
+    return Array.from(batchMap.values());
+  } catch (error) {
+    console.error("Error fetching all batches:", error);
+    throw error;
+  }
+};
+
+//getBatch based on id
+exports.getAllBatchesHandler = getAllBatchesHandler;
+const getBatchDetailsHandler = async id => {
+  try {
+    console.log("Fetching batch with ID:", id);
+    const options = {
+      query: _batch.batchQueries.getBatchDetails,
+      params: {
+        batchId: id
+      }
+    };
+    const [rows] = await _bigquery.bigquery.query(options);
+    if (rows.length === 0) {
+      throw new Error("Batch not found");
+    }
+    const batchData = {
+      id: rows[0].batchId,
+      courseId: rows[0].batchCourseId,
+      batchName: rows[0].batchName,
+      startDate: rows[0].batchStartDate,
+      endDate: rows[0].batchEndDate,
+      trainees: rows[0].trainees || [],
+      course: {
+        courseName: rows[0].courseName,
+        courseImg: rows[0].courseImg,
+        courseLink: rows[0].courseLink
+      }
+    };
+    return batchData;
+  } catch (error) {
+    console.error("Error fetching batch details:", error);
+    throw error;
+  }
+};
+exports.getBatchDetailsHandler = getBatchDetailsHandler;
+const getBatchByBatchNameHandler = async batchName => {
+  try {
+    console.log("Fetching Batch Details for Batch Name:", batchName);
+    const options = {
+      query: _batch.batchQueries.getBatchByBatchName,
+      params: {
+        batchName
+      }
+    };
+    const [rows] = await _bigquery.bigquery.query(options);
+    if (rows.length === 0) {
+      throw new Error("Batch not found");
+    }
+
+    // Transform the result into a structured response
+    const batchData = {
+      batchId: rows[0].batchId,
+      batchName: rows[0].batchName,
+      startDate: rows[0].startDate,
+      endDate: rows[0].endDate,
+      course: rows[0].courseId ? {
+        id: rows[0].courseId,
+        courseName: rows[0].courseName,
+        courseImg: rows[0].courseImg,
+        courseLink: rows[0].courseLink
+      } : null,
+      trainees: rows.filter(row => row.traineeId !== null) // Remove null values if no trainees exist
+      .map(row => ({
+        id: row.traineeId,
+        firstName: row.traineeFirstName,
+        lastName: row.traineeLastName
+      }))
+    };
+    return batchData;
+  } catch (error) {
+    console.error("Error fetching batch:", error);
+    throw error;
+  }
+};
+exports.getBatchByBatchNameHandler = getBatchByBatchNameHandler;
+const getBatchIdsByTraineeIdHandler = async id => {
+  try {
+    console.log("Fetching batches for traineeId:", id);
+    const options = {
+      query: _batch.batchQueries.getBatchIdsByTraineeId,
+      params: {
+        traineeId: id
+      }
+    };
+    const [rows] = await _bigquery.bigquery.query(options);
+    if (!rows || rows.length === 0) {
+      throw new Error("No batches found for this trainee");
+    }
+
+    // Extract only batch IDs
+    const batchIds = rows.map(row => row.batchId);
+    return batchIds;
+  } catch (error) {
+    console.error("Error fetching batch IDs:", error);
+    throw error;
+  }
+};
+
+//update batch
+exports.getBatchIdsByTraineeIdHandler = getBatchIdsByTraineeIdHandler;
+const updateBatchesHandler = async (id, req, updateBatch) => {
+  const {
+    user
+  } = req;
+  try {
+    console.log(`Updating batch with ID: ${id}`);
+
+    // Step 1: Fetch existing batch data
+    const batchOptions = {
+      query: _batch.batchQueries.getBatchDetails,
+      params: {
+        batchId: id
+      }
+    };
+    const [existingRows] = await _bigquery.bigquery.query(batchOptions);
+    if (existingRows.length === 0) {
+      throw new Error("Batch not found");
+    }
+    const existingBatch = existingRows[0];
+
+    // Step 2: Update batch details
+    const updateBatchOptions = {
+      query: _batch.batchQueries.updateBatch,
+      params: {
+        batchId: id,
+        batchName: updateBatch.batchName || existingBatch.batchName,
+        courseId: updateBatch.courseId || existingBatch.batchCourseId,
+        startDate: updateBatch.startDate || existingBatch.batchStartDate,
+        endDate: updateBatch.endDate || existingBatch.batchEndDate,
+        updatedBy: user.id,
+        updatedAt: new Date().toISOString()
+      }
+    };
+
+    // **Step 3: Audit Log for Batch Update**
+    // await bigquery.query({
+    //   query: auditQueries.insertAuditLog,
+    //   params: {
+    //     id: uuidv4(),
+    //     entityType: "Batch",
+    //     entityId: id,
+    //     action: "UPDATE",
+    //     previousData: JSON.stringify(existingBatch),
+    //     newData: JSON.stringify(updateBatch),
+    //     performedBy: user?.id,
+    //     createdAt: new Date().toISOString(),
+    //   },
+    // });
+
+    await _bigquery.bigquery.query(updateBatchOptions);
+    if (updateBatch.traineeIds && updateBatch.traineeIds.length > 0) {
+      // Step 1: Delete existing batch-trainee relationships
+      const deleteBatchOptions = {
+        query: _batchTrainee.batchTraineeQueries.deleteBatchTrainee,
+        params: {
+          batchId: id
+        }
+      };
+      await _bigquery.bigquery.query(deleteBatchOptions);
+
+      // Step 2: Validate the trainee IDs
+      const [validTrainees] = await _bigquery.bigquery.query({
+        query: _batchTrainee.batchTraineeQueries.getBatchTraineeIds,
+        params: {
+          traineeIds: updateBatch.traineeIds
+        }
+      });
+      const matchedTraineeIds = validTrainees.map(row => row.id);
+      if (matchedTraineeIds.length !== updateBatch.traineeIds.length) {
+        throw new Error("Some traineeIds were not found.");
+      }
+
+      // Step 3: Insert new trainees using `UNNEST`
+      const batchTraineeInsertData = matchedTraineeIds.map(traineeId => ({
+        batchId: id,
+        traineeId,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      }));
+      const insertBatchTraineesOptions = {
+        query: `
+          INSERT INTO \`${process.env.PROJECT_ID}.${process.env.DATASET_ID}.${process.env.TABLE_BATCH_TRAINEE}\`
+          (batchId, traineeId, createdAt, updatedAt)
+          SELECT
+            batchId,
+            traineeId,
+            TIMESTAMP(createdAt) AS createdAt,
+            TIMESTAMP(updatedAt) AS updatedAt
+          FROM UNNEST(@batchTraineeInsertData) AS batchTraineeInsertData
+        `,
+        params: {
+          batchTraineeInsertData
+        }
+      };
+      await _bigquery.bigquery.query(insertBatchTraineesOptions);
+    }
+
+    // **Step 3: Audit Log for Batch Update**
+    await _bigquery.bigquery.query({
+      query: _audit.auditQueries.insertAuditLog,
+      params: {
+        id: (0, _uuid.v4)(),
+        entityType: "Batch",
+        entityId: id,
+        action: "UPDATE",
+        previousData: JSON.stringify(existingBatch),
+        newData: JSON.stringify(updateBatch),
+        performedBy: user?.id,
+        createdAt: new Date().toISOString()
+      }
+    });
+    console.log("Audit log inserted for batch-trainee update.");
+    console.log(`Batch updated successfully.`);
+    return {
+      id,
+      ...updateBatch
+    };
+  } catch (error) {
+    console.error(`Error updating batch ${id}:`, error);
+    throw error;
+  }
+};
+
+//DELETE batch
+exports.updateBatchesHandler = updateBatchesHandler;
+const deleteBatchHandler = async (req, id) => {
+  const exist = await checkBatchTableExists();
+  const {
+    user
+  } = req;
+  if (!exist) {
+    console.error("Batch table does not exist");
+    return {
+      success: false,
+      message: "Batch table does not exist"
+    };
+  }
+  try {
+    console.log(`Deleting trainees associated with batch ID: ${id}`);
+    await _bigquery.bigquery.query({
+      query: _batchTrainee.batchTraineeQueries.deleteBatchTrainee,
+      params: {
+        batchId: id
+      }
+    });
+    console.log(`Deleting batch with ID: ${id}`);
+    await _bigquery.bigquery.query({
+      query: _batch.batchQueries.deleteBatch,
+      params: {
+        id
+      }
+    });
+
+    // **Audit Log for Deleting Batch**
+    console.log(`Inserting audit log for batch deletion (ID: ${id})...`);
+
+    //audit log
+    await _bigquery.bigquery.query({
+      query: _audit.auditQueries.insertAuditLog,
+      params: {
+        id: (0, _uuid.v4)(),
+        entityType: "Batch",
+        entityId: id,
+        action: "DELETE",
+        previousData: JSON.stringify({
+          batchId: id
+        }),
+        // Store previous data as a string
+        newData: "",
+        // Instead of `null`, use an empty string
+        performedBy: user?.id || "SYSTEM",
+        createdAt: new Date().toISOString()
+      },
+      types: {
+        previousData: "STRING",
+        newData: "STRING"
+      }
+    });
+    console.log(`Batch and associated trainees deleted successfully.`);
+    return {
+      success: true,
+      message: "Batch deleted successfully"
+    };
+  } catch (error) {
+    console.error(`Error deleting batch ${id}:`, error);
+    return {
+      success: false,
+      message: `Error deleting batch`
+    };
+  }
+};
+exports.deleteBatchHandler = deleteBatchHandler;
+//# sourceMappingURL=Batch.handler.js.map

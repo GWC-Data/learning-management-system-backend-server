@@ -1,0 +1,16 @@
+openapi: 3.0.0
+info:
+  title: Learning Management System Api
+  version: 1.0.0
+  description: Desc.
+servers:
+  - url: http://localhost:5050/
+    description: Local Server
+security:
+  - bearerAuth: []
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

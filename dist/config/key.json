@@ -1,0 +1,14 @@
+{
+  "type": "service_account",
+  "project_id": "teqcertify",
+  "private_key_id": "9ac50e4a08fa8828364e5a2e6516ab186b81ad7c",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQCNAMlinaNLcR8o\nU0wPBjoDbDppkI/6Dj/u6pE18mwEDEQNXZZmoIf2B/Bcksalzy4T9F4Jw1/y7J+6\nbcOWtFuuX1ktIsv7/aEn9kbkJRcJQeBRW/j3hXn9yl2U6GpXzSkcmYrw+ix3dhjJ\ntqvUelfCf12fVLqEnrK5qm55CFSzHWETG1vWgUliDOA0zwEGZ58PkFyRBVSCPNjP\npgI3q0vULaDdovNBFA1YQ9w0rbHRN9/PH4BYkxcCMZHNwJkCNiLlDouZk7mf6JAD\npEUuBrnoYqdLBFmaqJNjoYHsR/Vl/S8OBRH86zJsetgCslFL6KEL/Owc55/adudo\nvBJ62j3FAgMBAAECggEAGcBYBzOk/AU33ISB8oh/ldpxPJBTSybJFFgwlvqkMYUP\n9KTv7+RHkG5Yvn9r2iJhVvGdLwlIf7QpY8HiI6biy5DMV4rwWCA1C3hV8Bq5/03R\nquoyKPpukiQgPS7JJSnp5ThBgMsfzd16n3RGI3MIjhP2xD+UJN5a47+1l1MnLOLe\nSKMQpzENchvEUKnjyJr8Gu9kcsK/yS39wTEBWHoCZ518PBB36uyJdo5/QRfTdzAo\nCsalf7taAb2m9U5M+doctPABseIjxu5gK8IB+G99MIkIGN5/ImdKw53vGEJ/WO3Q\nJYG+PJO1zUL4mw5N6u/gIqXDZ/wiXjBjTnBCZvetjQKBgQDDKw19pNhVeyt7dw82\ncavO0jpaWifd4VFuxwA/o8gf8A2GN2ZRvEgzQEJFyCucCcb2y1o3Kz9ty7eP0VQx\nL/0lVVA0bRxSTBB9HJ08GhySQLxSZLoWp1WaIPUBcWncknMT85HVTl/8vzh8XUgg\nV7tmqMTXLk6cMx/Bx02XtYUo+wKBgQC488SFMMoR7ZIN33l/tdkfOrdGlyGCm5PD\n4iG8/CYvNuFU8WGcuCP8a6Ls/gNTCSIshMAgFNyIOshyNnzpWOIelZww2QL+KIdk\n1tqYhYVhQPrTDTRhhFRhuWiI/QwXQX6pTydrhBatMmL6eitEPbyHsjWUAcsI3ZZM\nAWPaVIb4PwKBgDW6kno2eX/+6peQzVVVsdC8O2hITZVdxEdU7ZKXii6QrYh3k+mI\nhe/mDtibJLZOUsH6dZmehFW7sYscO6tW5L/0XqIwL43QdvGagQbcwWTaAX5FUJ2P\n75cA37JIALbCcn/ZnBo2+2HfWrOSEpsky+iVKat7ihSiVmnIbmoHhOMlAoGAFPt6\nwQ1+7ze/iRlgRE/SGQvlPPnqUFHsGp3t6+3DOzoDqEpWI5x0YK+pZS+QGvx/RwOs\ndDdJqZ7ZnLN3ylVOGeApPxVvlHvumE8Tr5f+QMFJc2YdGi8UD54kMN5cX8sLXpPf\nSgBLPkzoE7iGbhB+8foSv/7QFOpmoarKtDtAsKsCgYALu1Sx3F55BDs7FfJklQPN\nrULKu2c/YzULVvkjSFJxdnJCAzp9OL0FNHK6i/tXE/rnwIdgkC3e5Bg5yAkvxs0f\nQDtdcQrzI8tmGO2rGXwNrXE2GH9guihh/W67E1nwi4kYleT8tp+xgtENtuET/c7G\nPHSHE4eClk0UrUb+cO1XQQ==\n-----END PRIVATE KEY-----\n",
+  "client_email": "wordpress-bigquery@teqcertify.iam.gserviceaccount.com",
+  "client_id": "118383643807887035008",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/wordpress-bigquery%40teqcertify.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com",
+  "bucketName": "profile-pictures-wordpress"
+}

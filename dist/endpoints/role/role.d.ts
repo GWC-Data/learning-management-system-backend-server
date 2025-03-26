@@ -1,0 +1,10 @@
+import { Endpoint, EndpointAuthType } from 'node-server-engine';
+export declare const createRoleEndpoint: Endpoint<EndpointAuthType.JWT>;
+export declare const getRoleEndpoint: Endpoint<EndpointAuthType.JWT>;
+export declare const getRoleDetailsEndpoint: Endpoint<EndpointAuthType.JWT>;
+export declare const updateRoleEndpoint: Endpoint<EndpointAuthType.JWT>;
+export declare const deleteRoleEndpoint: Endpoint<EndpointAuthType.JWT>;
+export declare const createPermissionEndpoint: Endpoint<EndpointAuthType.JWT>;
+export declare const getPermissionEndpoint: Endpoint<EndpointAuthType.JWT>;
+export declare const updatePermissionEndpoint: Endpoint<EndpointAuthType.JWT>;
+export declare const deletePermissionEndpoint: Endpoint<EndpointAuthType.JWT>;

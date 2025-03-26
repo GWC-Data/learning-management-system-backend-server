@@ -1,0 +1,343 @@
+/roles:
+  get:
+    summary: Get all roles
+    description: Fetches a list of all roles, including their permissions.
+    operationId: getRoles
+    security:
+      - bearerAuth: []
+    tags:
+      - Roles
+    parameters: []
+    responses:
+      '200':
+        description: A list of roles with their permissions
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                  name:
+                    type: string
+                  description:
+                    type: string
+                  permissions:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        action:
+                          type: string
+                        groupName:
+                          type: string
+      '500':
+        description: Internal server error
+
+  post:
+    summary: Create a new role
+    description: Creates a new role with optional permissions.
+    operationId: createRole
+    security:
+      - bearerAuth: []
+    tags:
+      - Roles
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+              description:
+                type: string
+              permissions:
+                type: array
+                items:
+                  type: string
+    responses:
+      '201':
+        description: Role created successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                role:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                    name:
+                      type: string
+                    description:
+                      type: string
+                    permissions:
+                      type: array
+                      items:
+                        type: string
+      '400':
+        description: Validation error
+      '500':
+        description: Internal server error
+
+/roles/{id}:
+  put:
+    summary: Update an existing role
+    description: Updates the details of a specific role by its ID.
+    operationId: updateRole
+    security:
+      - bearerAuth: []
+    tags:
+      - Roles
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+              description:
+                type: string
+              permissions:
+                type: array
+                items:
+                  type: string
+    responses:
+      '200':
+        description: Role updated successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                role:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                    name:
+                      type: string
+                    description:
+                      type: string
+                    permissions:
+                      type: array
+                      items:
+                        type: string
+      '400':
+        description: Validation error
+      '404':
+        description: Role not found
+      '500':
+        description: Internal server error
+
+  delete:
+    summary: Delete a role
+    description: Deletes a role by its ID.
+    operationId: deleteRole
+    security:
+      - bearerAuth: []
+    tags:
+      - Roles
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+    responses:
+      '200':
+        description: Role deleted successfully
+      '404':
+        description: Role not found
+      '500':
+        description: Internal server error
+
+/roles/{roleId}:
+  get:
+    summary: Get Role Details
+    description: Fetches the list of permissions associated with a specific role.
+    operationId: getRoleDetails
+    security:
+      - bearerAuth: []
+    tags:
+      - Roles
+    parameters:
+      - name: roleId
+        in: path
+        required: true
+        schema:
+          type: integer
+    responses:
+      '200':
+        description: A Role Details
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                  action:
+                    type: string
+      '404':
+        description: Role not found
+      '500':
+        description: Internal server error
+
+/permissions:
+  get:
+    summary: Get all permissions
+    description: Fetches a list of all permissions.
+    operationId: getPermissions
+    security:
+      - bearerAuth: []
+    tags:
+      - Permissions
+    responses:
+      '200':
+        description: A list of permissions
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                  action:
+                    type: string
+      '500':
+        description: Internal server error
+
+  post:
+    summary: Create a new permission
+    description: Creates a new permission.
+    operationId: createPermission
+    security:
+      - bearerAuth: []
+    tags:
+      - Permissions
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              action:
+                type: string         
+              description:
+                type: string
+              groupName:
+                type: string
+    responses:
+      '201':
+        description: Permission created successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                permission:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                    action:
+                      type: string
+      '400':
+        description: Validation error
+      '500':
+        description: Internal server error
+
+/permissions/{action}:
+  put:
+    summary: Update a permission
+    description: Updates a permission by its action.
+    operationId: updatePermission
+    security:
+      - bearerAuth: []
+    tags:
+      - Permissions
+    parameters:
+      - name: action
+        in: path
+        required: true
+        schema:
+          type: string
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              description:
+                type: string
+              groupName:
+                type: string
+    responses:
+      '200':
+        description: Permission updated successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                permission:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                    action:
+                      type: string
+      '404':
+        description: Permission not found
+      '500':
+        description: Internal server error
+
+  delete:
+    summary: Delete a permission
+    description: Deletes a permission by its action.
+    operationId: deletePermission
+    security:
+      - bearerAuth: []
+    tags:
+      - Permissions
+    parameters:
+      - name: action
+        in: path
+        required: true
+        schema:
+          type: string
+    responses:
+      '200':
+        description: Permission deleted successfully
+      '404':
+        description: Permission not found
+      '500':
+        description: Internal server error

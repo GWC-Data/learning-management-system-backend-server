@@ -1,0 +1,1 @@
+{"version":3,"file":"Role.js","names":[],"sources":["../../../src/db/models/Role.ts"],"sourcesContent":["export interface Role {\r\n  id?: string;\r\n  name: string;\r\n  description: string;\r\n  permissions: string[];\r\n  createdBy?: string;\r\n  updatedBy?: string;\r\n  createdAt?: string;\r\n  updateAt?: string;\r\n}"],"mappings":"","ignoreList":[]}

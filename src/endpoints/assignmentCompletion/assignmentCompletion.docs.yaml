@@ -1,0 +1,287 @@
+/assignment-completion:
+  get:
+    summary: Get all assignment completions
+    description: Retrieves a list of all assignment completions
+    tags:
+      - AssignmentCompletion
+    responses:
+      200:
+        description: List of assignment completions
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    example: 1
+                  courseAssignId:
+                    type: integer
+                    example: 101
+                  traineeId:
+                    type: integer
+                    example: 1
+                  obtainedMarks:
+                    type: number
+                    format: float
+                    example: 85.5
+                  courseAssignmentAnswerFile:
+                    type: string
+                    example: 'https://example.com/file.pdf'
+      404:
+        description: No assignment completions found
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: 'No assignment completions found'
+      500:
+        description: Internal server error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: 'Error fetching assignment completions'
+
+  post:
+    summary: Create a new assignment completion
+    description: Creates a new assignment completion with the provided details.
+    operationId: createAssignmentCompletion
+    security:
+      - bearerAuth: []
+    tags:
+      - AssignmentCompletion
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              courseAssignId:
+                type: integer
+                example: 101
+              traineeId:
+                type: integer
+                example: 1
+              obtainedMarks:
+                type: number
+                format: float
+                example: 85.5
+              courseAssignmentAnswerFile:
+                type: string
+                example: 'https://example.com/file.pdf'
+    responses:
+      201:
+        description: Assignment completion created successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: 'Assignment completion created successfully'
+      500:
+        description: Assignment completion creation error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: 'Error occurred while creating the assignment completion'
+                error:
+                  type: string
+      401:
+        description: Unauthorized
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: 'Unauthorized request'
+
+/assignment-completion/{id}:
+  put:
+    summary: Update an assignment completion by ID
+    description: Updates the information of an assignment completion by ID.
+    operationId: updateAssignmentCompletion
+    security:
+      - bearerAuth: []
+    tags:
+      - AssignmentCompletion
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: ID of the assignment completion to update
+        schema:
+          type: integer
+          example: 1
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              courseAssignId:
+                type: integer
+                example: 101
+              traineeId:
+                type: integer
+                example: 1
+              obtainedMarks:
+                type: number
+                format: float
+                example: 85.5
+              courseAssignmentAnswerFile:
+                type: string
+                example: 'https://example.com/file.pdf'
+    responses:
+      200:
+        description: Assignment completion updated successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: 'Assignment completion updated successfully'
+      404:
+        description: Assignment completion not found
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: 'Assignment completion not found'
+      500:
+        description: Internal server error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: 'Error updating assignment completion'
+                error:
+                  type: string
+
+  delete:
+    summary: Delete an assignment completion by ID
+    description: Deletes an assignment completion by ID.
+    operationId: deleteAssignmentCompletion
+    security:
+      - bearerAuth: []
+    tags:
+      - AssignmentCompletion
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: ID of the assignment completion to delete
+        schema:
+          type: integer
+          example: 1
+    responses:
+      200:
+        description: Assignment completion deleted successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: 'Assignment completion deleted successfully'
+      404:
+        description: Assignment completion not found
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: 'Assignment completion not found'
+      500:
+        description: Internal server error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: 'Error deleting assignment completion'
+
+  get:
+    summary: Get an assignment completion by ID
+    tags:
+      - AssignmentCompletion
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: ID of the assignment completion
+        schema:
+          type: integer
+          example: 1
+    responses:
+      200:
+        description: Assignment completion details
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                courseAssignId:
+                  type: integer
+                  example: 101
+                traineeId:
+                  type: integer
+                  example: 1
+                obtainedMarks:
+                  type: number
+                  format: float
+                  example: 85.5
+                courseAssignmentAnswerFile:
+                  type: string
+                  example: 'https://example.com/file.pdf'
+      404:
+        description: Assignment completion not found
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: 'Assignment completion not found'
+      500:
+        description: Internal server error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: 'Error fetching assignment completion'

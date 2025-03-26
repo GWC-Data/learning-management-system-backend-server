@@ -1,0 +1,303 @@
+/batch:
+  get:
+    summary: Get all batches
+    description: Retrieves a list of all batches
+    tags:
+      - Batch
+    responses:
+      200:
+        description: List of batches
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    example: 1
+                  batchName:
+                    type: string
+                    example: "Batch001"
+                  courseId:
+                    type: integer
+                    example: 1
+                  traineeId:
+                    type: integer
+                    example: 1
+                  startDate:
+                    type: string
+                    format: date
+                    example: "2024-01-01"
+                  endDate:
+                    type: string
+                    format: date
+                    example: "2024-06-30"
+      404:
+        description: No batches found
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: "No batches found"
+      500:
+        description: Internal server error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: "Error fetching batches"
+
+  post:
+    summary: Create a new batch
+    description: Creates a new batch with the provided details.
+    operationId: createBatch
+    security:
+      - bearerAuth: []
+    tags:
+      - Batch
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              batchName:
+                type: string
+                example: "Batch001"
+              courseId:
+                type: integer
+                example: 1
+              traineeId:
+                type: integer
+                example: 1
+              startDate:
+                type: string
+                format: date
+                example: "2024-01-01"
+              endDate:
+                type: string
+                format: date
+                example: "2024-06-30"
+    responses:
+      201:
+        description: Batch created successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: "Batch created successfully"
+      500:
+        description: Batch creation error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: "Error occurred while creating the batch"
+                error:
+                  type: string
+      401:
+        description: Unauthorized
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: "Unauthorized request"
+
+/batch/{id}:
+  put:
+    summary: Update a batch by ID
+    description: Updates the information of a batch by ID.
+    operationId: updateBatch
+    security:
+      - bearerAuth: []
+    tags:
+      - Batch
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: ID of the batch to update
+        schema:
+          type: integer
+          example: 1
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              batchName:
+                type: string
+                example: "Updated Batch001"
+              courseId:
+                type: integer
+                example: 1
+              traineeId:
+                type: integer
+                example: 1
+              startDate:
+                type: string
+                format: date
+                example: "2024-02-01"
+              endDate:
+                type: string
+                format: date
+                example: "2024-07-30"
+    responses:
+      200:
+        description: Batch updated successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: "Batch updated successfully"
+      404:
+        description: Batch not found
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: "Batch not found"
+      500:
+        description: Internal server error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: "Error updating batch"
+                error:
+                  type: string
+
+  delete:
+    summary: Delete a batch by ID
+    description: Deletes a batch by ID.
+    operationId: deleteBatch
+    security:
+      - bearerAuth: []
+    tags:
+      - Batch
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: ID of the batch to delete
+        schema:
+          type: integer
+          example: 1
+    responses:
+      200:
+        description: Batch deleted successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: "Batch deleted successfully"
+      404:
+        description: Batch not found
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: "Batch not found"
+      500:
+        description: Internal server error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: "Error deleting batch"
+
+  get:
+    summary: Get a batch by ID
+    tags:
+      - Batch
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: ID of the batch
+        schema:
+          type: integer
+          example: 1
+    responses:
+      200:
+        description: Batch details
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                batchName:
+                  type: string
+                  example: "Batch001"
+                courseId:
+                  type: integer
+                  example: 1
+                traineeId:
+                  type: integer
+                  example: 1
+                startDate:
+                  type: string
+                  format: date
+                  example: "2024-01-01"
+                endDate:
+                  type: string
+                  format: date
+                  example: "2024-06-30"
+      404:
+        description: Batch not found
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: "Batch not found"
+      500:
+        description: Internal server error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: "Error fetching batch"

@@ -1,0 +1,14 @@
+export declare const ATTENDANCE_GET_ERROR = " Error Getting attendance data";
+export declare const ATTENDANCE_CREATION_ERROR = "Error Creating attendance";
+export declare const ATTENDANCE_NOT_FOUND = "Attendance not found";
+export declare const ATTENDANCE_DELETION_ERROR = "Attendance Deletion error";
+export declare const ATTENDANCE_UPDATE_ERROR = "Attendance Updation error";
+export declare const COURSE_NOT_FOUND = "Course not found";
+export declare const MODULE_NOT_FOUND = "User not found";
+export declare const BATCH_NOT_FOUND = "User not found";
+export declare const CLASS_NOT_FOUND = "class not found";
+export declare const ATTENDANCEFILE_NOT_FOUND = "AttendanceFile not found";
+export declare const ATTENDANCEFILE_GET_ERROR = "Error Getting attendanceFile";
+export declare const ATTENDANCEFILE_CREATION_ERROR = "Error Creating attendanceFile";
+export declare const ATTENDANCEFILE_UPDATE_ERROR = "Error Updating attendanceFile";
+export declare const ATTENDANCEFILE_DELETE_ERROR = "Error Deleting attendanceFile";

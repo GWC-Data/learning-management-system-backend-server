@@ -1,0 +1,158 @@
+/class:
+  get:
+    summary: Get all classes
+    description: Retrieves a list of all classes
+    tags:
+      - Class
+    responses:
+      200:
+        description: List of classes
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                  classTitle:
+                    type: string
+                  classDescription:
+                    type: string
+                  classRecordedLink:
+                    type: string
+                  assignmentName:
+                    type: string
+                  assignmentFile: 
+                    type: string
+                  materialForClass:
+                    type: string
+                  totalMarks:
+                    type: string
+                  assignmentEndDate:
+                    type: string
+      '404':
+        description: No classes found
+
+      '500':
+        description: Internal server error
+       
+  post:
+    summary: Create a new class
+    description: Creates a new class with provided details.
+    operationId: createClass
+    security:
+      - bearerAuth: []
+    tags:
+      - Class
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              classTitle:
+                type: string
+              classDescription:
+                type: string
+              classRecordedLink:
+                type: string
+              assignmentName:
+                type: string
+              assignmentFile: 
+                type: string
+              materialForClass:
+                type: string
+              totalMarks:
+                type: string
+              assignmentEndDate:
+                type: string
+    responses:
+      '201':
+        description: Class created successfully
+        
+      '500':
+        description: Class creation error
+      
+      '401':
+        description: Unauthorized
+      
+
+/class/{id}:
+  put:
+    summary: Update a class by ID
+    description: Updates the information of a class by ID.
+    operationId: updateClass
+    security:
+      - bearerAuth: []
+    tags:
+      - Class
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: ID of the class to update
+        schema:
+          type: integer
+          example: 1
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              classTitle:
+                type: string
+              classDescription:
+                type: string
+              classRecordedLink:
+                type: string
+              assignmentName:
+                type: string
+              assignmentFile: 
+                type: string
+              materialForClass:
+                type: string
+              totalMarks:
+                type: string
+              assignmentEndDate:
+                type: string
+    responses:
+      '200':
+        description: Class updated successfully
+       
+      '404':
+        description: Class not found
+        
+      '500':
+        description: Error updating class
+       
+  delete:
+    summary: Delete a class by ID
+    description: Deletes a class by ID.
+    operationId: deleteClass
+    security:
+      - bearerAuth: []
+    tags:
+      - Class
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: ID of the class to delete
+        schema:
+          type: integer
+          example: 1
+    responses:
+      '200':
+        description: Class deleted successfully
+       
+      '404':
+        description: Class not found
+      
+      '500':
+        description: Error deleting class
+      
