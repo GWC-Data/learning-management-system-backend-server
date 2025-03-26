@@ -3,21 +3,18 @@
   "version": "1.0.0",
   "description": "LMS Project",
   "main": "dist/index.js",
-"scripts": {
-  "dev": "nodemon -e js,yaml -r @babel/register -r ./env/config.js ./dist/index.js",
-  "start": "node -r ./env/config.js dist/index.js",
-  "build": "rimraf dist && tsc -p tsconfig.build.json && tsc-alias -p tsconfig.build.json && npx babel src --out-dir dist --source-maps --extensions \".ts\" --ignore \"**/*.test.ts\" --copy-files --no-copy-ignored",
-  "build:prod": "npm run build && rimraf dist/**/*.test.js dist/**/*.spec.js",
-  "test": "NODE_ENV=test nyc --reporter=none mocha test/hooks.ts \"src/**/*.test.ts\"",
-  "test:ci": "npm run test -- --reporter spec",
-  "test:compose": "docker-compose up --abort-on-container-exit --build",
-  "coverage": "nyc report --reporter=text",
-  "coverage:ci": "nyc report --reporter=text-summary",
-  "lint": "eslint ./src",
-  "lint:fix": "eslint ./src --fix",
-  "deploy": "npm run build:prod && gcloud app deploy --quiet",
-  "postinstall": "npm run build:prod"
-},
+  "scripts": {
+    "start": "nodemon -e js,yaml -r @babel/register -r ./env/config.js ./dist/index.js",
+    "build": "rimraf dist && tsc -p tsconfig.build.json && tsc-alias -p tsconfig.build.json && npx babel src --out-dir dist --source-maps --extensions \".ts\" --ignore \"**/*.test.ts\" --copy-files --no-copy-ignored",
+    "test": "NODE_ENV=test nyc --reporter=none mocha test/hooks.ts \"src/**/*.test.ts\"",
+    "coverage": "nyc report --reporter=text",
+    "coverage:ci": "nyc report --reporter=text-summary",
+    "prepublishOnly": "npm run build",
+    "test:ci": "npm run test -- --reporter spec",
+    "test:compose": "docker-compose up --abort-on-container-exit --build",
+    "lint": "eslint ./src",
+    "lint:fix": "eslint ./src --fix"
+  },
   "husky": {
     "hooks": {
       "pre-commit": "lint-staged && npm run test && npm run coverage"
