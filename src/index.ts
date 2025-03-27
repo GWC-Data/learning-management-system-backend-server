@@ -4,7 +4,7 @@ import { createServer } from "app";
 createServer()
   .init()
   .then(() => {
-    console.log(`Server started successfully running on ${process.env.PORT}`);
+    console.log(`Server started successfully running on  ${process.env.PORT}`);
   })
   .catch((e) => {
     reportError(e);
