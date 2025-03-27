@@ -134,7 +134,7 @@ export const updateUserForAdminEndpoint = new Endpoint({
       // Call the update handler
       const response = await updateUserForAdminHandler(req, userId, updatedData);
  
-      res.status(200).json(response);
+      res.status(200).json({message: "User updated successfully", response});
     } catch (error) {
       console.error("Error updating user:", error);
       res.status(500).json({ error: (error as Error).message || "Internal server error" });

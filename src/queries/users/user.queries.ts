@@ -52,26 +52,6 @@ VALUES
            u.qualification, u.profilePic, u.roleId, u.accountStatus, r.name;
 `,
 
-//   updateUser: `
-//   UPDATE \`teqcertify.lms.users\`
-//   SET firstName = @firstName, 
-//       lastName = @lastName, 
-//       email = @email, 
-//       dateOfBirth = @dateOfBirth, 
-//       phoneNumber = @phoneNumber, 
-//       password = @password, 
-//       dateOfJoining = @dateOfJoining, 
-//       address = @address, 
-//       qualification = @qualification, 
-//       profilePic = @profilePic, 
-//       roleId = @roleId, 
-//       accountStatus = @accountStatus,
-//       updatedBy = @updatedBy,
-//       updatedAt = @updatedAt 
-//   WHERE id = @id
-// `,
-
-
 updateUserForAdmin: `
     UPDATE \`${process.env.PROJECT_ID}.${process.env.DATASET_ID}.${process.env.TABLE_USER}\`
     SET

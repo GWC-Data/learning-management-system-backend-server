@@ -9,9 +9,6 @@ import {
 } from '../../config/userProfilePicStorage';
 import { auditQueries } from 'queries/audit/audit.queries';
 
-const TABLE_USERSAVEDJOBBOARD =
-  process.env.TABLE_USERSAVEDJOBBOARD || 'userSavedJobBoard';
-
 const TABLE_USER = process.env.TABLE_USER || 'users';
 
 // Function to check if the users table exists
@@ -39,7 +36,7 @@ const createUserTableIfNotExists = async (): Promise<void> => {
             firstName STRING,
             lastName STRING,
             email STRING NOT NULL,
-            dateOfBirth DATE,
+            dateOfBirth STRING,
             phoneNumber STRING,
             password STRING NOT NULL,
             dateOfJoining DATE,
@@ -59,45 +56,6 @@ const createUserTableIfNotExists = async (): Promise<void> => {
     } catch (error) {
       console.error('Error creating users table:', error);
       throw new Error('Failed to create users table.');
-    }
-  }
-};
-
-// Function to check if the userSavedJob table exists
-const checkUserSavedJobTableExists = async (): Promise<boolean> => {
-  try {
-    console.log('Checking if userSavedJob table exists...');
-    const [rows] = await bigquery.query({
-      query: `SELECT table_name FROM \`teqcertify.lms.INFORMATION_SCHEMA.TABLES\` WHERE table_name = '${TABLE_USERSAVEDJOBBOARD}'`
-    });
-    console.log(`Table exists: ${rows.length > 0}`);
-    return rows.length > 0;
-  } catch (error) {
-    console.error('Error checking table existence:', error);
-    throw new Error('Database error while checking table existence.');
-  }
-};
-
-// Function to create the userSavedJob table if it does not exist
-const createUserSavedJobTableIfNotExists = async (): Promise<void> => {
-  const exists = await checkUserSavedJobTableExists();
-  if (!exists) {
-    try {
-      console.log('Creating UsersavedJobBoard table...');
-      await bigquery.query({
-        query: `
-
-        CREATE TABLE \`${process.env.PROJECT_ID}.${process.env.DATASET_ID}.${process.env.TABLE_USERSAVEDJOBBOARD}\` (
-            userId STRING NOT NULL,
-            jobId STRING NOT NULL,
-            createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-          )`
-      });
-      console.log('usersavedjobBoard table created successfully.');
-    } catch (error) {
-      console.error('Error creating usersavedjob table:', error);
-      throw new Error('Failed to create usersavedjob table.');
     }
   }
 };
@@ -292,6 +250,211 @@ export const getUserByIdHandler = async (id: string) => {
 };
 
 
+// export const updateUserForAdminHandler = async (
+//   req: any,
+//   userId: string,
+//   updatedData: Partial<User>
+// ) => {
+//   const { user } = req;
+//   try {
+//     // Fetch existing user data
+//     const userQueryOptions = {
+//       query: userQueries.getUserById,
+//       params: { id: userId }
+//     };
+ 
+//     const [existingRows] = await bigquery.query(userQueryOptions);
+ 
+//     if (existingRows.length === 0) {
+//       throw new Error(`User with ID ${userId} not found.`);
+//     }
+ 
+//     const existingUser = existingRows[0];
+ 
+//     // Prepare update values
+//     const updateParams: Record<string, any> = {
+//       id: userId,
+//       firstName: updatedData.firstName || null,
+//       lastName: updatedData.lastName || null,
+//       email: updatedData.email || null,
+//       phoneNumber: updatedData.phoneNumber || null,
+//       dateOfBirth: updatedData.dateOfBirth || null,
+//       // password: updatedData.password || null,
+//       // dateOfJoining: updatedData.dateOfJoining || null,
+//       qualification: updatedData.qualification || null,
+//       address: updatedData.address || null,
+//       roleId: updatedData.roleId || null,
+//       accountStatus: updatedData.accountStatus || null,
+//       updatedBy: user?.id,
+//       updatedAt: new Date().toISOString()
+//     };
+ 
+//     console.log('Update User Params:', updateParams);
+ 
+//     // Update user details
+//     await bigquery.query({
+//       query: userQueries.updateUserForAdmin,
+//       params: updateParams
+//     });
+ 
+//     // Insert audit log
+//     const auditLogParams = {
+//       id: uuidv4(),
+//       entityType: 'User',
+//       entityId: userId,
+//       action: 'UPDATE',
+//       previousData: JSON.stringify(existingUser),
+//       newData: JSON.stringify(updateParams),
+//       performedBy: user?.id || null,
+//       createdAt: new Date().toISOString()
+//     };
+ 
+//     await bigquery.query({
+//       query: auditQueries.insertAuditLog,
+//       params: auditLogParams,
+//       types: { previousData: 'STRING', newData: 'STRING' }
+//     });
+ 
+//     console.log('Audit log inserted successfully.');
+//     console.log(`User ${userId} updated successfully.`);
+ 
+//     return {
+//       id: userId,
+//       ...updatedData
+//     };
+//   } catch (error) {
+//     console.error(`Error updating user ${userId}:`, error);
+//     throw error;
+//   }
+// };
+
+
+// UPDATE user for trainee
+
+// export const updateUserForAdminHandler = async (
+//   req: any,
+//   userId: string,
+//   updatedData: Partial<User>
+// ) => {
+//   const { user } = req;
+//   try {
+//     // Fetch existing user data
+//     const userQueryOptions = {
+//       query: userQueries.getUserById,
+//       params: { id: userId }
+//     };
+ 
+//     const [existingRows] = await bigquery.query(userQueryOptions);
+ 
+//     if (existingRows.length === 0) {
+//       throw new Error(`User with ID ${userId} not found.`);
+//     }
+ 
+//     const existingUser = existingRows[0];
+ 
+//     // Prepare update values with explicit types for null values
+//     const updateParams: Record<string, any> = {
+//       id: userId,
+//       firstName: updatedData.firstName || null,
+//       lastName: updatedData.lastName || null,
+//       email: updatedData.email || null,
+//       phoneNumber: updatedData.phoneNumber || null,
+//       dateOfBirth: updatedData.dateOfBirth || null,
+//       qualification: updatedData.qualification || null,
+//       address: updatedData.address || null,
+//       roleId: updatedData.roleId || null,
+//       accountStatus: updatedData.accountStatus || null,
+//       updatedBy: user?.id,
+//       updatedAt: new Date().toISOString()
+//     };
+ 
+//     // Enhanced logging for debugging
+//     console.log('Existing User:', existingUser);
+//     console.log('Update Params:', JSON.stringify(updateParams, null, 2));
+ 
+//     // Specify types for all parameters, especially null values
+//     const updateQueryOptions = {
+//       query: userQueries.updateUserForAdmin,
+//       params: updateParams,
+//       types: {
+//         id: 'STRING',
+//         firstName: 'STRING',
+//         lastName: 'STRING',
+//         email: 'STRING',
+//         phoneNumber: 'STRING',
+//         dateOfBirth: 'DATE',
+//         qualification: 'STRING',
+//         address: 'STRING',
+//         roleId: 'STRING',
+//         accountStatus: 'STRING',
+//         updatedBy: 'STRING',
+//         updatedAt: 'TIMESTAMP'
+//       }
+//     };
+ 
+//     // Validate parameters before query
+//     Object.entries(updateParams).forEach(([key, value]) => {
+//       if (value !== null && value !== undefined) {
+//         console.log(`Updating ${key}: ${value}`);
+//       }
+//     });
+ 
+//     // Perform the update query
+//     const [updateResult] = await bigquery.query(updateQueryOptions);
+//     console.log('Update Query Result:', updateResult);
+ 
+//     // Check affected rows
+//     const checkQueryOptions = {
+//       query: `
+//         SELECT * FROM \`${process.env.PROJECT_ID}.${process.env.DATASET_ID}.${process.env.TABLE_USER}\`
+//         WHERE id = @id
+//       `,
+//       params: { id: userId }
+//     };
+    
+//     const [checkRows] = await bigquery.query(checkQueryOptions);
+//     console.log('Updated User Check:', checkRows[0]);
+ 
+//     // Rest of the code remains the same...
+//     const auditLogParams = {
+//       id: uuidv4(),
+//       entityType: 'User',
+//       entityId: userId,
+//       action: 'UPDATE',
+//       previousData: JSON.stringify(existingUser),
+//       newData: JSON.stringify(updateParams),
+//       performedBy: user?.id || null,
+//       createdAt: new Date().toISOString()
+//     };
+ 
+//     await bigquery.query({
+//       query: auditQueries.insertAuditLog,
+//       params: auditLogParams,
+//       types: { 
+//         id: 'STRING',
+//         entityType: 'STRING',
+//         entityId: 'STRING',
+//         action: 'STRING',
+//         previousData: 'STRING', 
+//         newData: 'STRING',
+//         performedBy: 'STRING',
+//         createdAt: 'TIMESTAMP'
+//       }
+//     });
+ 
+//     console.log('Audit log inserted successfully.');
+//     console.log(`User ${userId} updated successfully.`);
+ 
+//     return {
+//       id: userId,
+//       ...updatedData
+//     };
+//   } catch (error) {
+//     console.error(`Error updating user ${userId}:`, error);
+//     throw error;
+//   }
+// };
+
 export const updateUserForAdminHandler = async (
   req: any,
   userId: string,
@@ -313,16 +476,16 @@ export const updateUserForAdminHandler = async (
  
     const existingUser = existingRows[0];
  
-    // Prepare update values
+    // Prepare update values with explicit types for null values
     const updateParams: Record<string, any> = {
       id: userId,
       firstName: updatedData.firstName || null,
       lastName: updatedData.lastName || null,
       email: updatedData.email || null,
       phoneNumber: updatedData.phoneNumber || null,
-      dateOfBirth: updatedData.dateOfBirth || null,
-      // password: updatedData.password || null,
-      // dateOfJoining: updatedData.dateOfJoining || null,
+      dateOfBirth: updatedData.dateOfBirth 
+        ? new Date(updatedData.dateOfBirth).toISOString().split('T')[0] 
+        : null,
       qualification: updatedData.qualification || null,
       address: updatedData.address || null,
       roleId: updatedData.roleId || null,
@@ -331,15 +494,60 @@ export const updateUserForAdminHandler = async (
       updatedAt: new Date().toISOString()
     };
  
-    console.log('Update User Params:', updateParams);
+    console.log('Update Params:', JSON.stringify(updateParams, null, 2));
  
-    // Update user details
-    await bigquery.query({
-      query: userQueries.updateUserForAdmin,
-      params: updateParams
-    });
+    // Specify types for all parameters, especially null values
+    const updateQueryOptions = {
+      query: `
+        UPDATE \`${process.env.PROJECT_ID}.${process.env.DATASET_ID}.${process.env.TABLE_USER}\`
+        SET
+          firstName = COALESCE(@firstName, firstName),
+          lastName = COALESCE(@lastName, lastName),
+          email = COALESCE(@email, email),
+          phoneNumber = COALESCE(@phoneNumber, phoneNumber),
+          dateOfBirth = COALESCE(@dateOfBirth, dateOfBirth),
+          qualification = COALESCE(@qualification, qualification),
+          address = COALESCE(@address, address),
+          roleId = COALESCE(@roleId, roleId),
+          accountStatus = COALESCE(@accountStatus, accountStatus),
+          updatedBy = @updatedBy,
+          updatedAt = @updatedAt
+        WHERE id = @id;
+      `,
+      params: updateParams,
+      types: {
+        id: 'STRING',
+        firstName: 'STRING',
+        lastName: 'STRING',
+        email: 'STRING',
+        phoneNumber: 'STRING',
+        dateOfBirth: 'STRING',
+        qualification: 'STRING',
+        address: 'STRING',
+        roleId: 'STRING',
+        accountStatus: 'STRING',
+        updatedBy: 'STRING',
+        updatedAt: 'TIMESTAMP'
+      }
+    };
  
-    // Insert audit log
+    // Perform the update query and get affected rows
+    const [updateResult] = await bigquery.query(updateQueryOptions);
+    console.log('Update Query Result:', updateResult);
+ 
+    // Verify the update by fetching the updated user
+    const checkQueryOptions = {
+      query: `
+        SELECT * FROM \`${process.env.PROJECT_ID}.${process.env.DATASET_ID}.${process.env.TABLE_USER}\`
+        WHERE id = @id
+      `,
+      params: { id: userId }
+    };
+    
+    const [checkRows] = await bigquery.query(checkQueryOptions);
+    console.log('Updated User Check:', checkRows[0]);
+ 
+    // Rest of the audit log insertion remains the same
     const auditLogParams = {
       id: uuidv4(),
       entityType: 'User',
@@ -354,7 +562,16 @@ export const updateUserForAdminHandler = async (
     await bigquery.query({
       query: auditQueries.insertAuditLog,
       params: auditLogParams,
-      types: { previousData: 'STRING', newData: 'STRING' }
+      types: { 
+        id: 'STRING',
+        entityType: 'STRING',
+        entityId: 'STRING',
+        action: 'STRING',
+        previousData: 'STRING', 
+        newData: 'STRING',
+        performedBy: 'STRING',
+        createdAt: 'TIMESTAMP'
+      }
     });
  
     console.log('Audit log inserted successfully.');
@@ -370,8 +587,6 @@ export const updateUserForAdminHandler = async (
   }
 };
 
-
-// UPDATE user for trainee
 export const updateUserForTraineeHandler = async (
   req: any,
   userId: string,

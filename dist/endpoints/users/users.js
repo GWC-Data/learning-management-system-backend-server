@@ -122,6 +122,7 @@ const getUserByIdEndpoint = exports.getUserByIdEndpoint = new _nodeServerEngine.
 // });
 
 //Update User For Admin
+
 const updateUserForAdminEndpoint = exports.updateUserForAdminEndpoint = new _nodeServerEngine.Endpoint({
   path: "/userForAdmin/:id",
   method: _nodeServerEngine.EndpointMethod.PUT,
@@ -132,7 +133,10 @@ const updateUserForAdminEndpoint = exports.updateUserForAdminEndpoint = new _nod
 
       // Call the update handler
       const response = await (0, _users2.updateUserForAdminHandler)(req, userId, updatedData);
-      res.status(200).json(response);
+      res.status(200).json({
+        message: "User updated successfully",
+        response
+      });
     } catch (error) {
       console.error("Error updating user:", error);
       res.status(500).json({
