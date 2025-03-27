@@ -35,7 +35,8 @@ COPY --from=builder /usr/src/app/dist ./dist
 
 # ✅ Copy config and keys
 COPY --from=builder /usr/src/app/env/config.js ./env/config.js  
-COPY --from=builder /usr/src/app/config/key.json ./config/key.json
+COPY src/config/key.json ./config/key.json
+
 COPY --from=builder /usr/src/app/keys/jwks.json ./keys/jwks.json
 
 # Required environment variables
