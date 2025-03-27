@@ -4,7 +4,7 @@ info:
   version: 1.0.0
   description: Desc.
 servers:
-  - url: http://localhost:5050/
+  - url: http://localhost:8080/
     description: Local Server
 security:
   - bearerAuth: []

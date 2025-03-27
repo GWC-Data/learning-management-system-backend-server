@@ -39,8 +39,8 @@ COPY --from=builder /usr/src/app/env/config.js ./env/config.js
 COPY keys/jwks.json ./keys/jwks.json
 
 # Required environment variables
-ENV PORT=5050 \
-    SECONDARY_PORT=5050 \
+ENV PORT=8080 \
+    SECONDARY_PORT=8081 \
     ACCESS_TOKEN_AUDIENCE=domo \
     ACCESS_TOKEN_ISSUER=gwc \
     ADMIN_API_ACCESS_TOKEN_AUDIENCE=domo \
@@ -51,7 +51,7 @@ ENV PORT=5050 \
     PROJECT_ID=teqcertify \
     DATASET_ID=lms
 
-EXPOSE 5050
+EXPOSE 8080
 
 # Use npm run start with proper signal handling
 CMD ["npm", "run", "start"]

@@ -4,5 +4,5 @@ info:
   description: ~~description~~
   version: 0.0.1
 servers:
-  - url: http://localhost:5050/
+  - url: http://localhost:8080/
     description: Local Server
