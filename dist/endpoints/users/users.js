@@ -130,6 +130,7 @@ const updateUserForAdminEndpoint = exports.updateUserForAdminEndpoint = new _nod
     try {
       const userId = req.params.id;
       const updatedData = req.body;
+      console.log('updatedData', updatedData);
 
       // Call the update handler
       const response = await (0, _users2.updateUserForAdminHandler)(req, userId, updatedData);

@@ -162,6 +162,15 @@ const updateUserValidator = exports.updateUserValidator = {
       errorMessage: "Role ID must be an string"
     }
   }
+  // jobBoardAccess: {
+  //   in: ["body"],
+  //   optional: true,
+  //   isString: { errorMessage: "jobBoardAccess must be a string" },
+  //   isIn: {
+  //     options: ["enable", "disable"],
+  //     errorMessage: "Invalid Job Board Access",
+  //   },
+  // },
 };
 
 // ID Validator for endpoints requiring a user ID

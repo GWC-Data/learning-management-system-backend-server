@@ -91,17 +91,6 @@ Object.keys(_BatchClassSchedule).forEach(function (key) {
     }
   });
 });
-var _CourseAssignment = require("./CourseAssignment");
-Object.keys(_CourseAssignment).forEach(function (key) {
-  if (key === "default" || key === "__esModule") return;
-  if (key in exports && exports[key] === _CourseAssignment[key]) return;
-  Object.defineProperty(exports, key, {
-    enumerable: true,
-    get: function () {
-      return _CourseAssignment[key];
-    }
-  });
-});
 var _AssignmentCompletion = require("./AssignmentCompletion");
 Object.keys(_AssignmentCompletion).forEach(function (key) {
   if (key === "default" || key === "__esModule") return;

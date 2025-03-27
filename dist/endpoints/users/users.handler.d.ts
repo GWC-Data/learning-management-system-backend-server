@@ -26,6 +26,7 @@ export declare const getAllUsersHandler: () => Promise<{
     roleId: any;
     roleName: any;
     accountStatus: any;
+    jobBoardAccess: any;
 }[]>;
 export declare const getUserByIdHandler: (id: string) => Promise<{
     id: any;
@@ -41,6 +42,7 @@ export declare const getUserByIdHandler: (id: string) => Promise<{
     roleId: any;
     roleName: any;
     accountStatus: any;
+    jobBoardAccess: any;
 }>;
 export declare const updateUserForAdminHandler: (req: any, userId: string, updatedData: Partial<User>) => Promise<{
     id: string;
@@ -56,11 +58,11 @@ export declare const updateUserForAdminHandler: (req: any, userId: string, updat
     profilePic?: string | undefined;
     roleId?: string | undefined;
     accountStatus?: ("active" | "suspended" | "inactive") | undefined;
+    jobBoardAccess?: ("enabled" | "disabled" | null) | undefined;
     createdBy?: string | undefined;
     updatedBy?: string | undefined;
     createdAt?: string | undefined;
     updatedAt?: string | undefined;
-    jobIds?: string[] | undefined;
 }>;
 export declare const updateUserForTraineeHandler: (req: any, userId: string, updatedData: Partial<User>, file?: Express.Multer.File) => Promise<{
     profilePic: any;
@@ -76,11 +78,11 @@ export declare const updateUserForTraineeHandler: (req: any, userId: string, upd
     qualification?: string | undefined;
     roleId?: string | undefined;
     accountStatus?: ("active" | "suspended" | "inactive") | undefined;
+    jobBoardAccess?: ("enabled" | "disabled" | null) | undefined;
     createdBy?: string | undefined;
     updatedBy?: string | undefined;
     createdAt?: string | undefined;
     updatedAt?: string | undefined;
-    jobIds?: string[] | undefined;
 }>;
 export declare const deleteUserHandler: (req: any, id: string) => Promise<{
     success: boolean;

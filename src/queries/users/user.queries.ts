@@ -1,12 +1,12 @@
 export const userQueries = {
   createUser: `
   INSERT INTO  \`${process.env.PROJECT_ID}.${process.env.DATASET_ID}.${process.env.TABLE_USER}\`
-(id, firstName, lastName, email, dateOfBirth, phoneNumber, password, dateOfJoining, address, qualification, profilePic, roleId, accountStatus, createdBy, createdAt)
+(id, firstName, lastName, email, dateOfBirth, phoneNumber, password, dateOfJoining, address, qualification, profilePic, roleId, accountStatus, jobBoardAccess, createdBy, createdAt)
 VALUES
-(@id, @firstName, @lastName, @email, @dateOfBirth, @phoneNumber, @password, @dateOfJoining, @address, @qualification, @profilePic, @roleId, @accountStatus, @createdBy, @createdAt)
+(@id, @firstName, @lastName, @email, @dateOfBirth, @phoneNumber, @password, @dateOfJoining, @address, @qualification, @profilePic, @roleId, @accountStatus, @jobBoardAccess, @createdBy, @createdAt)
 `,
 
-    getAllUsers: `
+  getAllUsers: `
     SELECT
       u.id AS userId,
       u.firstName,
@@ -19,6 +19,7 @@ VALUES
       u.qualification,
       u.profilePic,
       u.roleId,
+      u.jobBoardAccess,
       r.id,
       r.name AS roleName, 
       u.accountStatus
@@ -41,6 +42,7 @@ VALUES
     u.qualification,
     u.profilePic,
     u.roleId,
+    u.jobBoardAccess,
     r.name AS roleName, 
     u.accountStatus,
   FROM \`${process.env.PROJECT_ID}.${process.env.DATASET_ID}.${process.env.TABLE_USER}\` u
@@ -49,10 +51,10 @@ VALUES
   WHERE u.id = @id
   GROUP BY u.id, u.firstName, u.lastName, u.email, u.phoneNumber,
            u.dateOfBirth, u.dateOfJoining, u.address,
-           u.qualification, u.profilePic, u.roleId, u.accountStatus, r.name;
+           u.qualification, u.profilePic, u.roleId, u.accountStatus, r.name, u.jobBoardAccess;
 `,
 
-updateUserForAdmin: `
+  updateUserForAdmin: `
     UPDATE \`${process.env.PROJECT_ID}.${process.env.DATASET_ID}.${process.env.TABLE_USER}\`
     SET
       firstName = COALESCE(@firstName, firstName),
@@ -64,14 +66,13 @@ updateUserForAdmin: `
       address = COALESCE(@address, address),
       roleId = COALESCE(@roleId, roleId),
       accountStatus = COALESCE(@accountStatus, accountStatus),
+      jobBoardAccess = COALESCE(@jobBoardAccess, jobBoardAccess),
       updatedBy = @updatedBy,
       updatedAt = @updatedAt
     WHERE id = @id;
     `,
 
-
-    updateTraineeUser:
-    `
+  updateTraineeUser: `
     UPDATE \`${process.env.PROJECT_ID}.${process.env.DATASET_ID}.${process.env.TABLE_USER}\`
 SET
     firstName = COALESCE(@firstName, firstName),

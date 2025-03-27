@@ -46,6 +46,7 @@ const createUserTableIfNotExists = async () => {
             profilePic STRING,
             roleId STRING,
             accountStatus STRING,
+            jobBoardAccess STRING,
             createdBy STRING NOT NULL,
             updatedBy STRING,
             createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -76,12 +77,13 @@ const createUserHandler = async (req, userData) => {
       phoneNumber,
       password,
       dateOfJoining,
-      roleId
+      roleId,
+      jobBoardAccess
     } = userData;
-    if (!firstName || !lastName || !email || !password || !roleId) {
+    if (!firstName || !lastName || !email || !password || !roleId || !jobBoardAccess) {
       return {
         success: false,
-        errors: ["Missing required fields: firstName, lastName, email, password, or roleId."]
+        errors: ["Missing required fields: firstName, lastName, email, password, roleId or jobBoardAccess."]
       };
     }
 
@@ -128,6 +130,7 @@ const createUserHandler = async (req, userData) => {
         roleId,
         accountStatus: "active",
         // 🔹 Default to "active"
+        jobBoardAccess,
         createdBy,
         createdAt
       },
@@ -155,6 +158,7 @@ const createUserHandler = async (req, userData) => {
         phoneNumber,
         roleId,
         accountStatus: "active",
+        jobBoardAccess,
         createdAt
       }),
       performedBy: createdBy,
@@ -204,7 +208,8 @@ const getAllUsersHandler = async () => {
       roleId: row.roleId,
       roleName: row.roleName ?? "No Role Assigned",
       // ✅ Ensures roleName is included
-      accountStatus: row.accountStatus
+      accountStatus: row.accountStatus,
+      jobBoardAccess: row.jobBoardAccess
     }));
     return users;
   } catch (error) {
@@ -243,7 +248,8 @@ const getUserByIdHandler = async id => {
       profilePic: rows[0].profilePic,
       roleId: rows[0].roleId,
       roleName: rows[0].roleName,
-      accountStatus: rows[0].accountStatus
+      accountStatus: rows[0].accountStatus,
+      jobBoardAccess: rows[0].jobBoardAccess
     };
     return userData;
   } catch (error) {
@@ -486,6 +492,7 @@ const updateUserForAdminHandler = async (req, userId, updatedData) => {
       address: updatedData.address || null,
       roleId: updatedData.roleId || null,
       accountStatus: updatedData.accountStatus || null,
+      jobBoardAccess: updatedData.jobBoardAccess ? updatedData.jobBoardAccess : null,
       updatedBy: user?.id,
       updatedAt: new Date().toISOString()
     };
@@ -505,10 +512,11 @@ const updateUserForAdminHandler = async (req, userId, updatedData) => {
           address = COALESCE(@address, address),
           roleId = COALESCE(@roleId, roleId),
           accountStatus = COALESCE(@accountStatus, accountStatus),
+          jobBoardAccess = IFNULL(@jobBoardAccess, jobBoardAccess),
           updatedBy = @updatedBy,
           updatedAt = @updatedAt
         WHERE id = @id;
-      `,
+        `,
       params: updateParams,
       types: {
         id: 'STRING',
@@ -521,6 +529,7 @@ const updateUserForAdminHandler = async (req, userId, updatedData) => {
         address: 'STRING',
         roleId: 'STRING',
         accountStatus: 'STRING',
+        jobBoardAccess: 'STRING',
         updatedBy: 'STRING',
         updatedAt: 'TIMESTAMP'
       }
