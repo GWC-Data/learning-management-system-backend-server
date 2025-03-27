@@ -57,8 +57,8 @@ export declare const updateUserForAdminHandler: (req: any, userId: string, updat
     qualification?: string | undefined;
     profilePic?: string | undefined;
     roleId?: string | undefined;
-    accountStatus?: ("active" | "suspended" | "inactive") | undefined;
-    jobBoardAccess?: ("enabled" | "disabled" | null) | undefined;
+    accountStatus?: "active" | "suspended" | "inactive" | undefined;
+    jobBoardAccess?: "enabled" | "disabled" | null | undefined;
     createdBy?: string | undefined;
     updatedBy?: string | undefined;
     createdAt?: string | undefined;
@@ -77,8 +77,8 @@ export declare const updateUserForTraineeHandler: (req: any, userId: string, upd
     address?: string | undefined;
     qualification?: string | undefined;
     roleId?: string | undefined;
-    accountStatus?: ("active" | "suspended" | "inactive") | undefined;
-    jobBoardAccess?: ("enabled" | "disabled" | null) | undefined;
+    accountStatus?: "active" | "suspended" | "inactive" | undefined;
+    jobBoardAccess?: "enabled" | "disabled" | null | undefined;
     createdBy?: string | undefined;
     updatedBy?: string | undefined;
     createdAt?: string | undefined;
