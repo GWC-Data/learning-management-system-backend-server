@@ -40,7 +40,7 @@ COPY keys/jwks.json ./keys/jwks.json
 
 # Required environment variables
 ENV PORT=5050 \
-    SECONDARY_PORT=5051 \
+    SECONDARY_PORT=5050 \
     ACCESS_TOKEN_AUDIENCE=domo \
     ACCESS_TOKEN_ISSUER=gwc \
     ADMIN_API_ACCESS_TOKEN_AUDIENCE=domo \

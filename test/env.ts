@@ -5,7 +5,7 @@ import path from 'path';
  */
 process.env = {
   SILENCE_REPORT: 'true',
-  PORT: '5050',
+  PORT: '8080',
   SECONDARY_PORT: '8181',
   NODE_ENV: 'test',
   TLS_SERVER_KEY: path.resolve('certs/server.key'),
