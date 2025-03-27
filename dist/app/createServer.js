@@ -12,7 +12,6 @@ _nodeServerEngine.reportDebug.setNameSpace('learning-management-system-backend')
 
 /** Initialize the server */
 function createServer() {
-  console.log(endpoints);
   return new _nodeServerEngine.Server({
     globalMiddleware: [_nodeServerEngine.middleware.swaggerDocs()],
     endpoints: Object.values(endpoints)

@@ -6,7 +6,6 @@ reportDebug.setNameSpace('learning-management-system-backend');
 
 /** Initialize the server */
 export function createServer(): Server {
-  console.log(endpoints);
   return new Server({
     globalMiddleware: [middleware.swaggerDocs()],
     endpoints: Object.values(endpoints)

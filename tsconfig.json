@@ -5,9 +5,10 @@
       "test": ["../test"],
       "test/*": ["../test/*"]
     },
+    "module": "ESNext", 
     "target":  "ES6",
     "lib": ["ES2023"],
-    "module": "commonjs",
+    // "module": "commonjs",
     "moduleResolution": "node",
     "outDir": "./dist",
     "noImplicitAny": true,
