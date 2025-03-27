@@ -5,8 +5,8 @@ import dotenv from "dotenv";
 // Load environment variables from .env
 dotenv.config();
 
-// Resolve key file path
-const keyFilePath: string = process.env.GOOGLE_APPLICATION_CREDENTIALS || path.resolve(process.cwd(), "config", "key.json");
+// Resolve key file path correctly
+const keyFilePath: string = process.env.GOOGLE_APPLICATION_CREDENTIALS || path.resolve(__dirname, "..", "config", "key.json");
 
 // Initialize BigQuery client
 export const bigquery = new BigQuery({

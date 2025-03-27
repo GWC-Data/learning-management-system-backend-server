@@ -14,7 +14,7 @@ COPY tsconfig*.json ./
 RUN npm install --include=dev
 RUN npm install date-fns @types/date-fns --save-dev
 
-# 4. Copy all source files (including config.js)
+# 4. Copy all source files (including config)
 COPY . .
 
 # 5. Run build
@@ -33,10 +33,10 @@ COPY --from=builder /usr/src/app/package*.json ./
 COPY --from=builder /usr/src/app/node_modules ./node_modules  
 COPY --from=builder /usr/src/app/dist ./dist  
 
-# ✅ Explicitly copy env/config.js
+# ✅ Copy config and keys
 COPY --from=builder /usr/src/app/env/config.js ./env/config.js  
-
-COPY keys/jwks.json ./keys/jwks.json
+COPY --from=builder /usr/src/app/config/key.json ./config/key.json
+COPY --from=builder /usr/src/app/keys/jwks.json ./keys/jwks.json
 
 # Required environment variables
 ENV PORT=8080 \
