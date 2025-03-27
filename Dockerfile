@@ -39,7 +39,6 @@ COPY --from=builder /usr/src/app/env/config.js ./env/config.js
 COPY keys/jwks.json ./keys/jwks.json
 
 # Required environment variables
-# Required environment variables
 ENV PORT=8080 \
     SECONDARY_PORT=8081 \
     ACCESS_TOKEN_AUDIENCE=domo \
@@ -50,41 +49,7 @@ ENV PORT=8080 \
     DB_MIGRATION=false \
     DEBUG="" \
     PROJECT_ID=teqcertify \
-    DATASET_ID=lms \
-    # Database tables
-    TABLE_AUDIT=audit \
-    TABLE_USER=users \
-    TABLE_PERMISSION=permissions \
-    TABLE_ROLE=roles \
-    TABLE_ROLE_PERMISSION=rolePermissions \
-    TABLE_COURSE=course \
-    TABLE_COURSE_CATEGORY=courseCategory \
-    TABLE_COMPANY_INFO=companyinfo \
-    TABLE_BATCH=batches \
-    TABLE_BATCH_TRAINEE=batchTrainees \
-    TABLE_BATCH_CLASS_SCHEDULE=batchClassSchedules \
-    TABLE_BATCH_TRAINER=batchTrainers \
-    TABLE_MODULE=modules \
-    TABLE_JOBBOARD=jobboard \
-    TABLE_CLASS=classes \
-    TABLE_USERSAVEDJOBBOARD=userSavedJobBoard \
-    TABLE_COURSE_ASSIGNMENT=courseAssignments \
-    TABLE_ATTENDANCE_FILE=attendanceFiles \
-    TABLE_ATTENDANCE=attendance \
-    TABLE_ASSIGNMENTCOMPLETION=assignmentCompletions \
-    TABLE_LINKEDIN_JOBS=jobTables \
-    TABLE_ASSIGNMENT=assignments \
-    # Bucket folders
-    BUCKET_NAME=profile-pictures-wordpress \
-    USERPROFILEPIC_BUCKET_FOLDER=users \
-    COURSECATEGORY_BUCKET_FOLDER=courseCategory \
-    COURSE_BUCKET_FOLDER=course \
-    MODULE_BUCKET_FOLDER=module \
-    CLASS_BUCKET_FOLDER=class \
-    COURSE_ASSIGNMENT_BUCKET_FOLDER=courseAssignmentFile \
-    ATTENDANCE_FILE_BUCKET_FOLDER=attendanceFile \
-    ASSIGNMENTCOMPLETION_BUCKET_FOLDER=assignmentCompletion \
-    LINKEDIN_JOBS_IMAGE_FOLDER=linkedInJobImage
+    DATASET_ID=lms
 
 EXPOSE 8080
 
