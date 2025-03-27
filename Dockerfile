@@ -33,9 +33,7 @@ COPY --from=builder /usr/src/app/package*.json ./
 COPY --from=builder /usr/src/app/node_modules ./node_modules
 COPY --from=builder /usr/src/app/dist ./dist
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
-  CMD wget -qO- http://localhost:5050/health || exit 1
+
 
 # Required environment variables with secure defaults
 ENV PORT=5050 \
