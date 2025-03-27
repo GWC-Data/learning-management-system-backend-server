@@ -35,10 +35,10 @@ COPY --from=builder /usr/src/app/dist ./dist
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
-  CMD wget -qO- http://localhost:8080/health || exit 1
+  CMD wget -qO- http://localhost:5050/health || exit 1
 
 # Required environment variables with secure defaults
-ENV PORT=8080 \
+ENV PORT=5050 \
     SECONDARY_PORT=5051 \
     ACCESS_TOKEN_AUDIENCE=domo \
     ACCESS_TOKEN_ISSUER=gwc \
@@ -50,7 +50,7 @@ ENV PORT=8080 \
     PROJECT_ID=teqcertify \
     DATASET_ID=lms
 
-EXPOSE 8080
+EXPOSE 5050
 
 # Use npm run start with proper signal handling
 CMD ["npm", "run", "start"]
