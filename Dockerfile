@@ -7,14 +7,14 @@ WORKDIR /usr/src/app
 RUN apk add --no-cache python3 make g++ git
 
 # 2. Copy package files first for better caching
-COPY package*.json ./
-COPY tsconfig*.json ./
+COPY package*.json ./  
+COPY tsconfig*.json ./  
 
 # 3. Install all dependencies including types
 RUN npm install --include=dev
 RUN npm install date-fns @types/date-fns --save-dev
 
-# 4. Copy all source files
+# 4. Copy all source files (including config.js)
 COPY . .
 
 # 5. Run build
@@ -29,13 +29,14 @@ WORKDIR /usr/src/app
 ENV NODE_ENV=production
 
 # Copy necessary files from builder
-COPY --from=builder /usr/src/app/package*.json ./
-COPY --from=builder /usr/src/app/node_modules ./node_modules
-COPY --from=builder /usr/src/app/dist ./dist
+COPY --from=builder /usr/src/app/package*.json ./  
+COPY --from=builder /usr/src/app/node_modules ./node_modules  
+COPY --from=builder /usr/src/app/dist ./dist  
 
+# ✅ Explicitly copy env/config.js
+COPY --from=builder /usr/src/app/env/config.js ./env/config.js  
 
-
-# Required environment variables with secure defaults
+# Required environment variables
 ENV PORT=5050 \
     SECONDARY_PORT=5051 \
     ACCESS_TOKEN_AUDIENCE=domo \
