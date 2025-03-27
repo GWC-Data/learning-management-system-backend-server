@@ -36,6 +36,8 @@ COPY --from=builder /usr/src/app/dist ./dist
 # ✅ Explicitly copy env/config.js
 COPY --from=builder /usr/src/app/env/config.js ./env/config.js  
 
+COPY  .env .env
+
 # Required environment variables
 ENV PORT=5050 \
     SECONDARY_PORT=5051 \
