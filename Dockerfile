@@ -14,7 +14,7 @@ COPY tsconfig*.json ./
 RUN npm install --include=dev
 RUN npm install date-fns @types/date-fns --save-dev
 
-# 4. Copy all source files (excluding .env in production)
+# 4. Copy all source files
 COPY . .
 
 # 5. Run build
@@ -33,18 +33,15 @@ COPY --from=builder /usr/src/app/package*.json ./
 COPY --from=builder /usr/src/app/node_modules ./node_modules
 COPY --from=builder /usr/src/app/dist ./dist
 
-# Health check (adjust to your application's health endpoint)
+# Health check
 HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
   CMD wget -qO- http://localhost:8080/health || exit 1
 
-# Default environment variables (override in Cloud Run)
+# Default environment variables
 ENV PORT=8080 \
-    SECONDARY_PORT=5051 \
-    DEBUG= \
-    DB_MIGRATION=false
-
-# For development, you could optionally copy .env (not recommended for production)
-# COPY --from=builder /usr/src/app/.env .env
+    SECONDARY_PORT=5051
 
 EXPOSE 8080
-CMD ["node", "dist/index.js"]
+
+# Use npm run start instead of direct node execution
+CMD ["npm", "run", "start"]
