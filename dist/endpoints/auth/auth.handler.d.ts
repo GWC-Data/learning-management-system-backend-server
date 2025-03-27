@@ -6,6 +6,7 @@ export declare const loginHandler: (email: string, password: string) => Promise<
         firstName: any;
         lastName: any;
         email: any;
+        jobBoardAccess: any;
         roleId: any;
         role: any;
         permissions: any;
