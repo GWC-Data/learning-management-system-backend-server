@@ -12,9 +12,9 @@ export interface User {
   profilePic?: string;
   roleId: string;
   accountStatus?: 'active' | 'suspended' | 'inactive';
+  jobBoardAccess?: 'enabled' | 'disabled' | null;
   createdBy?: string;
   updatedBy?: string;
   createdAt?: string;
   updatedAt?: string;
-  jobIds?: string[]; 
 }

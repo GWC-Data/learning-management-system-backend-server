@@ -66,7 +66,7 @@ export const createUserValidator: Schema = {
   roleId: {
     in: ["body"],
     isString: { errorMessage: "Role ID must be an string" }
-  },
+  }
 };
 
 // Update User Validator (Partial validation for updates)
@@ -118,6 +118,15 @@ export const updateUserValidator: Schema = {
     optional: true,
     isString: { errorMessage: "Role ID must be an string" }
   },
+  // jobBoardAccess: {
+  //   in: ["body"],
+  //   optional: true,
+  //   isString: { errorMessage: "jobBoardAccess must be a string" },
+  //   isIn: {
+  //     options: ["enable", "disable"],
+  //     errorMessage: "Invalid Job Board Access",
+  //   },
+  // },
 };
 
 // ID Validator for endpoints requiring a user ID

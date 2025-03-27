@@ -6,7 +6,6 @@ export * from './Role';
 export * from './Batch';
 export * from './Modules';
 export * from './BatchClassSchedule';
-export * from './CourseAssignment';
 export * from './AssignmentCompletion';
 export * from './LinkedIn';
 export * from './Class';
