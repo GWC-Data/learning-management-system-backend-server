@@ -1,7 +1,7 @@
 {
   "name": "@gwcdata/learning-management-system-backend",
   "version": "1.0.0",
-  "type": "module",
+  "type": "commonjs",
   "description": "LMS Project",
   "main": "dist/index.js",
   "scripts": {
