@@ -512,60 +512,92 @@ export const getBatchClassScheduleByBatchIdHandler = async (batchId: string) => 
     }
 
     // ✅ Transform result to match expected response structure
-    const batchClassSchedule = rows.map(row => ({
-      id: row.batchClassScheduleId,
-      batchId: row.batchId,
-      moduleId: row.module?.id || null,
-      classId: row.class?.id || null,
-      startDate: row.startDate,
-      startTime: row.startTime,
-      endDate: row.endDate,
-      endTime: row.endTime,
-      meetingLink: row.meetingLink,
-      duration: row.duration,
-      createdAt: row.createdAt,
-      updatedAt: row.updatedAt,
-      module: {
-        id: row.module?.id || null,
-        moduleName: row.module?.moduleName || null,
-        materialForModule: row.module?.materialForModule || null
-      },
-      class: {
-        id: row.class?.id || null,
-        classTitle: row.class?.classTitle || null,
-      },
-      batch: {
-        id: row.batch?.id || null,
-        batchName: row.batch?.batchName || null,
-        startDate: row.batch?.startDate || null,
-        endDate: row.batch?.endDate || null
-      },
-      trainers: row.trainers
-        ? row.trainers.map((trainer: { id: any; firstName: any; lastName: any; BatchTrainer: { batchClassScheduleId: any; trainerId: any; createdAt: any; updatedAt: any; }; }) => ({
-          id: trainer.id,
-          firstName: trainer.firstName,
-          lastName: trainer.lastName,
-          BatchTrainer: {
-            batchClassScheduleId: trainer.BatchTrainer?.batchClassScheduleId || null,
-            trainerId: trainer.BatchTrainer?.trainerId || null,
-            createdAt: trainer.BatchTrainer?.createdAt || null,
-            updatedAt: trainer.BatchTrainer?.updatedAt || null
-          }
-        }))
-        : [],
-      assignments: row.assignments
-        ? row.assignments.map((assignment: { id: any; batchId: any; assignmentTraineeId: any; traineeFirstName: any; traineeLastName: any; assignmentEndDate: any; createdAt: any; updatedAt: any; }) => ({
-          id: assignment.id,
-          batchId: assignment.batchId,
-          traineeId: assignment.assignmentTraineeId,
-          traineeFirstName: assignment.traineeFirstName || null,  // ✅ Added Trainee First Name
-          traineeLastName: assignment.traineeLastName || null,    // ✅ Added Trainee Last Name
-          assignmentEndDate: assignment.assignmentEndDate,
-          createdAt: assignment.createdAt,
-          updatedAt: assignment.updatedAt
-        }))
-        : []
-    }));
+    // const batchClassSchedule = rows.map(row => ({
+    //   id: row.batchClassScheduleId,
+    //   batchId: row.batchId,
+    //   moduleId: row.moduleId || null,
+    //   classId: row.classId || null,
+    //   startDate: row.startDate,
+    //   startTime: row.startTime,
+    //   endDate: row.endDate,
+    //   endTime: row.endTime,
+    //   meetingLink: row.meetingLink,
+    //   createdAt: row.createdAt,
+    //   updatedAt: row.updatedAt,
+    //   module: {
+    //     id: row.module?.id || null,
+    //     moduleName: row.module?.moduleName || null,
+    //     materialForModule: row.module?.materialForModule || null
+    //   },
+    //   class: {
+    //     id: row.class?.id || null,
+    //     classTitle: row.class?.classTitle || null,
+    //   },
+    //   batch: {
+    //     id: row.batch?.id || null,
+    //     batchName: row.batch?.batchName || null,
+    //     startDate: row.batch?.startDate || null,
+    //     endDate: row.batch?.endDate || null
+    //   },
+    //   trainers: row.trainers
+    //     ? row.trainers.map((trainer: { id: any; firstName: any; lastName: any; BatchTrainer: { batchClassScheduleId: any; trainerId: any; createdAt: any; updatedAt: any; }; }) => ({
+    //       id: trainer.id,
+    //       firstName: trainer.firstName,
+    //       lastName: trainer.lastName,
+    //       BatchTrainer: {
+    //         batchClassScheduleId: trainer.BatchTrainer?.batchClassScheduleId || null,
+    //         trainerId: trainer.BatchTrainer?.trainerId || null,
+    //         createdAt: trainer.BatchTrainer?.createdAt || null,
+    //         updatedAt: trainer.BatchTrainer?.updatedAt || null
+    //       }
+    //     }))
+    //     : [],
+    //   assignments: row.assignments
+    //     ? row.assignments.map((assignment: { id: any; batchId: any; assignmentTraineeId: any; traineeFirstName: any; traineeLastName: any; assignmentEndDate: any; createdAt: any; updatedAt: any; }) => ({
+    //       id: assignment.id,
+    //       batchId: assignment.batchId,
+    //       traineeId: assignment.assignmentTraineeId,
+    //       traineeFirstName: assignment.traineeFirstName || null,  // ✅ Added Trainee First Name
+    //       traineeLastName: assignment.traineeLastName || null,    // ✅ Added Trainee Last Name
+    //       assignmentEndDate: assignment.assignmentEndDate,
+    //       createdAt: assignment.createdAt,
+    //       updatedAt: assignment.updatedAt
+    //     }))
+    //     : []
+    // }));
+
+      // Transform result to match expected response structure
+      const batchClassSchedule = rows.map(row => ({
+        id: row.batchClassScheduleId,
+        batchId: row.batchId,
+        moduleId: row.moduleId || null,
+        classId: row.classId || null,
+        startDate: row.startDate,
+        startTime: row.startTime,
+        endDate: row.endDate,
+        endTime: row.endTime,
+        meetingLink: row.meetingLink,
+        duration: null, // You might want to calculate this
+        createdAt: row.createdAt,
+        updatedAt: row.updatedAt,
+        module: {
+          id: row.module?.id || null,
+          moduleName: row.module?.moduleName || null,
+          materialForModule: row.module?.materialForModule || null
+        },
+        class: {
+          id: row.class?.id || null,
+          classTitle: row.class?.classTitle || null,
+        },
+        batch: {
+          id: row.batch?.id || null,
+          batchName: row.batch?.batchName || null,
+          startDate: row.batch?.startDate || null,
+          endDate: row.batch?.endDate || null
+        },
+        trainers: row.trainers || [],
+        assignments: row.assignments || []
+      }));
 
     return { message: "Batch Module Schedule retrieved successfully", batchClassSchedule };
   } catch (error) {
@@ -573,7 +605,6 @@ export const getBatchClassScheduleByBatchIdHandler = async (batchId: string) => 
     throw error;
   }
 };
-
 
 export const updateBatchClassScheduleHandler = async (
   req: any,

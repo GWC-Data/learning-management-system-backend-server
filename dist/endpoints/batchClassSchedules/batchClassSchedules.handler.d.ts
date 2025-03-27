@@ -122,7 +122,7 @@ export declare const getBatchClassScheduleByBatchIdHandler: (batchId: string) =>
         endDate: any;
         endTime: any;
         meetingLink: any;
-        duration: any;
+        duration: null;
         createdAt: any;
         updatedAt: any;
         module: {

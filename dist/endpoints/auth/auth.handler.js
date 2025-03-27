@@ -49,6 +49,7 @@ const loginHandler = async (email, password) => {
       firstName: userDetails.firstName,
       lastName: userDetails.lastName,
       email: userDetails.email,
+      jobBoardAccess: userDetails.jobBoardAccess,
       roleId: userDetails.roleId,
       role: userDetails.roleName,
       permissions: userDetails.permissions || []

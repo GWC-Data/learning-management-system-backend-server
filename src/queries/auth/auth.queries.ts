@@ -8,7 +8,7 @@ export const authQueries = {
     // Fetch user details, role, and permissions
     getUserDetailsWithRole: `
       SELECT 
-        u.id, u.firstName, u.lastName, u.email, 
+        u.id, u.firstName, u.lastName, u.email, u.jobBoardAccess,
         r.id as roleId, r.name as roleName, 
         ARRAY_AGG(p.action) as permissions
       FROM \`${process.env.PROJECT_ID}.${process.env.DATASET_ID}.${process.env.TABLE_USER}\` u
@@ -19,7 +19,7 @@ export const authQueries = {
       LEFT JOIN \`${process.env.PROJECT_ID}.${process.env.DATASET_ID}.${process.env.TABLE_PERMISSION}\` p
         ON rp.permissionId = p.id
       WHERE u.id = @userId
-      GROUP BY u.id, u.firstName, u.lastName, u.email, r.id, r.name
+      GROUP BY u.id, u.firstName, u.lastName, u.email, u.jobBoardAccess, r.id, r.name
     `,
   };
   

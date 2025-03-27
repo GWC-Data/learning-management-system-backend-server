@@ -59,7 +59,7 @@ LEFT JOIN \`${process.env.PROJECT_ID}.${process.env.DATASET_ID}.${process.env.TA
     GROUP BY bm.id, bm.batchId, bm.moduleId, bm.classId, bm.startDate, bm.startTime, bm.endDate, bm.endTime, bm.meetingLink, bm.assignmentEndDate, 
              b.id, b.batchName, md.id, md.moduleName, c.id, c.classTitle`,
 
-getAllBatchClassSchedules: `
+  getAllBatchClassSchedules: `
   SELECT 
     bm.id AS batchClassScheduleId,
     bm.batchId AS batchId,
@@ -115,94 +115,85 @@ ORDER BY bm.id;
 `,
 
   getBatchClassScheduleByBatchId: `
-  SELECT 
-    bms.id AS batchClassScheduleId,
-    bms.batchId, 
-    bms.moduleId,
-    bms.classId,
-    CAST(bms.startDate AS STRING) AS startDate,
-    CAST(bms.startTime AS STRING) AS startTime,
-    CAST(bms.endDate AS STRING) AS endDate,
-    CAST(bms.endTime AS STRING) AS endTime,
-    bms.meetingLink,
-    bms.assignmentEndDate,
-    CAST(bms.createdAt AS STRING) AS createdAt,
-    CAST(bms.updatedAt AS STRING) AS updatedAt,
+SELECT 
+bms.id AS batchClassScheduleId,
+bms.batchId, 
+bms.moduleId,
+bms.classId,
+CAST(bms.startDate AS STRING) AS startDate,
+CAST(bms.startTime AS STRING) AS startTime,
+CAST(bms.endDate AS STRING) AS endDate,
+CAST(bms.endTime AS STRING) AS endTime,
+bms.meetingLink,
+bms.assignmentEndDate,
+CAST(bms.createdAt AS STRING) AS createdAt,
+CAST(bms.updatedAt AS STRING) AS updatedAt,
 
-    -- Fetching module details
-    STRUCT(
-        COALESCE(m.id, '') AS id,
-        COALESCE(m.moduleName, '') AS moduleName,
-        COALESCE(m.materialForModule, '') AS materialForModule
-    ) AS module,
+-- Fetching module details
+STRUCT(
+    COALESCE(m.id, '') AS id,
+    COALESCE(m.moduleName, '') AS moduleName,
+    COALESCE(m.materialForModule, '') AS materialForModule
+) AS module,
 
-    -- Fetching batch details
-    STRUCT(
-        b.id AS id,
-        b.batchName AS batchName,
-        CAST(b.startDate AS STRING) AS startDate,
-        CAST(b.endDate AS STRING) AS endDate
-    ) AS batch,
+-- Fetching batch details
+STRUCT(
+    b.id AS id,
+    b.batchName AS batchName,
+    CAST(b.startDate AS STRING) AS startDate,
+    CAST(b.endDate AS STRING) AS endDate
+) AS batch,
 
-    -- Fetching class details
-    STRUCT(
-        COALESCE(c.id, '') AS id,
-        COALESCE(c.classTitle, '') AS classTitle
-    ) AS class,
+-- Fetching class details
+STRUCT(
+    COALESCE(c.id, '') AS id,
+    COALESCE(c.classTitle, '') AS classTitle
+) AS class,
 
-   -- Fetching trainers with a subquery
-    (
-        SELECT ARRAY_AGG(STRUCT(
-            u.id AS id,
-            u.firstName AS firstName,
-            u.lastName AS lastName,
-            STRUCT(bt.batchClassScheduleId AS batchClassScheduleId, bt.trainerId AS trainerId) AS BatchTrainer
-        ))
-        FROM \`${process.env.PROJECT_ID}.${process.env.DATASET_ID}.${process.env.TABLE_BATCH_TRAINER}\` bt
-        LEFT JOIN \`${process.env.PROJECT_ID}.${process.env.DATASET_ID}.${process.env.TABLE_USER}\` u 
-            ON bt.trainerId = u.id
-        WHERE bt.batchClassScheduleId = bms.id
-    ) AS trainers,
+-- Fetching trainers with a subquery
+(
+    SELECT ARRAY_AGG(STRUCT(
+        u.id AS id,
+        u.firstName AS firstName,
+        u.lastName AS lastName,
+        STRUCT(bt.batchClassScheduleId AS batchClassScheduleId, bt.trainerId AS trainerId) AS BatchTrainer
+    ))
+    FROM \`${process.env.PROJECT_ID}.${process.env.DATASET_ID}.${process.env.TABLE_BATCH_TRAINER}\` bt
+    LEFT JOIN \`${process.env.PROJECT_ID}.${process.env.DATASET_ID}.${process.env.TABLE_USER}\` u 
+        ON bt.trainerId = u.id
+    WHERE bt.batchClassScheduleId = bms.id
+) AS trainers,
 
-    -- Fetching assignments with a subquery
-    (
-        SELECT ARRAY_AGG(STRUCT(
-            ass.id AS assignmentId,
-            ass.batchId AS assignmentBatchId,
-            ass.traineeId AS assignmentTraineeId,
-            u.firstName AS traineeFirstName,
-            u.lastName AS traineeLastName,
-            ass.assignmentEndDate AS assignmentEndDate
-        ))
-        FROM \`${process.env.PROJECT_ID}.${process.env.DATASET_ID}.${process.env.TABLE_ASSIGNMENT}\` ass
-        LEFT JOIN \`${process.env.PROJECT_ID}.${process.env.DATASET_ID}.${process.env.TABLE_USER}\` u
-            ON ass.traineeId = u.id
-        WHERE ass.batchId = bms.batchId
-    ) AS assignments
-  FROM \`${process.env.PROJECT_ID}.${process.env.DATASET_ID}.${process.env.TABLE_BATCH_CLASS_SCHEDULE}\` bms
-  LEFT JOIN \`${process.env.PROJECT_ID}.${process.env.DATASET_ID}.${process.env.TABLE_MODULE}\` m 
-      ON bms.moduleId = m.id
-  LEFT JOIN \`${process.env.PROJECT_ID}.${process.env.DATASET_ID}.${process.env.TABLE_BATCH}\` b 
-      ON bms.batchId = b.id
-  LEFT JOIN \`${process.env.PROJECT_ID}.${process.env.DATASET_ID}.${process.env.TABLE_CLASS}\` c 
-      ON bms.classId = c.id
-  LEFT JOIN \`${process.env.PROJECT_ID}.${process.env.DATASET_ID}.${process.env.TABLE_BATCH_TRAINER}\` bt 
-      ON bms.id = bt.batchClassScheduleId  
-  LEFT JOIN \`${process.env.PROJECT_ID}.${process.env.DATASET_ID}.${process.env.TABLE_USER}\` u 
-      ON bt.trainerId = u.id
-  LEFT JOIN \`${process.env.PROJECT_ID}.${process.env.DATASET_ID}.${process.env.TABLE_ASSIGNMENT}\` a 
-      ON bms.batchId = a.batchId  -- Linking assignments with the batch
-  LEFT JOIN \`${process.env.PROJECT_ID}.${process.env.DATASET_ID}.${process.env.TABLE_USER}\` tu
-      ON a.traineeId = tu.id -- Joining to get trainee details
-  WHERE bms.classId = @classId
-  GROUP BY 
-      bms.id, bms.batchId, bms.moduleId, bms.classId, bms.startDate, bms.startTime, 
-      bms.endDate, bms.endTime, bms.meetingLink, bms.assignmentEndDate, 
-      bms.createdAt, bms.updatedAt, 
-      m.id, m.moduleName, m.materialForModule, 
-      b.id, b.batchName, b.startDate, b.endDate,
-      c.id, c.classTitle,
-      tu.id, tu.firstName, tu.lastName;
+-- Fetching assignments with a subquery
+(
+    SELECT ARRAY_AGG(STRUCT(
+        ass.id AS assignmentId,
+        ass.batchId AS assignmentBatchId,
+        ass.traineeId AS assignmentTraineeId,
+        u.firstName AS traineeFirstName,
+        u.lastName AS traineeLastName,
+        ass.assignmentEndDate AS assignmentEndDate
+    ))
+    FROM \`${process.env.PROJECT_ID}.${process.env.DATASET_ID}.${process.env.TABLE_ASSIGNMENT}\` ass
+    LEFT JOIN \`${process.env.PROJECT_ID}.${process.env.DATASET_ID}.${process.env.TABLE_USER}\` u
+        ON ass.traineeId = u.id
+    WHERE ass.batchId = @batchId
+) AS assignments
+FROM \`${process.env.PROJECT_ID}.${process.env.DATASET_ID}.${process.env.TABLE_BATCH_CLASS_SCHEDULE}\` bms
+LEFT JOIN \`${process.env.PROJECT_ID}.${process.env.DATASET_ID}.${process.env.TABLE_MODULE}\` m 
+  ON bms.moduleId = m.id
+LEFT JOIN \`${process.env.PROJECT_ID}.${process.env.DATASET_ID}.${process.env.TABLE_BATCH}\` b 
+  ON bms.batchId = b.id
+LEFT JOIN \`${process.env.PROJECT_ID}.${process.env.DATASET_ID}.${process.env.TABLE_CLASS}\` c 
+  ON bms.classId = c.id
+WHERE bms.batchId = @batchId
+GROUP BY 
+  bms.id, bms.batchId, bms.moduleId, bms.classId, bms.startDate, bms.startTime, 
+  bms.endDate, bms.endTime, bms.meetingLink, bms.assignmentEndDate, 
+  bms.createdAt, bms.updatedAt, 
+  m.id, m.moduleName, m.materialForModule, 
+  b.id, b.batchName, b.startDate, b.endDate,
+  c.id, c.classTitle
 `,
 
   getBatchClassScheduleByClassId: `
@@ -292,20 +283,18 @@ LEFT JOIN UniqueAssignments ua
 WHERE bms.classId = @classId
 `,
 
-
   updateBatchClassSchedule: `
 UPDATE \`${process.env.PROJECT_ID}.${process.env.DATASET_ID}.${process.env.TABLE_BATCH_CLASS_SCHEDULE}\`
     SET  moduleId = @moduleId, classId = @classId, startDate = @startDate, startTime = @startTime, endDate = @endDate, endTime = @endTime, meetingLink = @meetingLink, assignmentEndDate = @assignmentEndDate, 
     updatedBy = @updatedBy, updatedAt = @updatedAt
     WHERE id = @batchClassScheduleId`,
-    
 
-    bulkUpdateAssignmentEndDate: `
+  bulkUpdateAssignmentEndDate: `
     UPDATE \`${process.env.PROJECT_ID}.${process.env.DATASET_ID}.${process.env.TABLE_ASSIGNMENT}\`
     SET assignmentEndDate = @newAssignmentEndDate
     WHERE batchId = @batchId
   `,
-  
+
   updateTraineeAssignmentEndDate: `
     UPDATE \`${process.env.PROJECT_ID}.${process.env.DATASET_ID}.${process.env.TABLE_ASSIGNMENT}\`
     SET assignmentEndDate = @assignmentEndDate
@@ -314,6 +303,5 @@ UPDATE \`${process.env.PROJECT_ID}.${process.env.DATASET_ID}.${process.env.TABLE
 
   deleteBatchClassSchedule: `
  DELETE FROM \`${process.env.PROJECT_ID}.${process.env.DATASET_ID}.${process.env.TABLE_BATCH_CLASS_SCHEDULE}\`
-    WHERE id = @id`,
-
+    WHERE id = @id`
 };
