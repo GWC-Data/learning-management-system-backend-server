@@ -19,7 +19,7 @@ const checkBatchClassScheduleTableExists = async () => {
     });
     return rows.length > 0;
   } catch (error) {
-    console.error("Error checking table existence:", error);
+    console.error('Error checking table existence:', error);
     throw error;
   }
 };
@@ -49,14 +49,13 @@ const createBatchClassScheduleTableIfNotExists = async () => {
           )
         `
       });
-      console.log("BatchClassSchedule table created successfully.");
+      console.log('BatchClassSchedule table created successfully.');
     } catch (error) {
-      console.error("Error creating BatchClassSchedule table:", error);
+      console.error('Error creating BatchClassSchedule table:', error);
       throw error;
     }
   }
 };
-
 
 const checkAssignmentTableExists = async () => {
   try {
@@ -69,11 +68,10 @@ const checkAssignmentTableExists = async () => {
     });
     return rows.length > 0;
   } catch (error) {
-    console.error("Error checking table existence:", error);
+    console.error('Error checking table existence:', error);
     throw error;
   }
 };
-
 
 const createAssignmentTableIfNotExists = async () => {
   const exists = await checkAssignmentTableExists();
@@ -92,15 +90,13 @@ const createAssignmentTableIfNotExists = async () => {
           )
         `
       });
-      console.log("Assignments table created successfully.");
+      console.log('Assignments table created successfully.');
     } catch (error) {
-      console.error("Error creating Assignments table:", error);
+      console.error('Error creating Assignments table:', error);
       throw error;
     }
   }
 };
-
-
 
 // Function to check if the batchTrainer table exists
 const checkBatchTrainerTableExists = async () => {
@@ -114,7 +110,7 @@ const checkBatchTrainerTableExists = async () => {
     });
     return rows.length > 0;
   } catch (error) {
-    console.error("Error checking table existence:", error);
+    console.error('Error checking table existence:', error);
     throw error;
   }
 };
@@ -134,115 +130,131 @@ const createBatchTrainerTableIfNotExists = async () => {
           )
         `
       });
-      console.log("BatchTrainer table created successfully.");
+      console.log('BatchTrainer table created successfully.');
     } catch (error) {
-      console.error("Error creating BatchTrainer table:", error);
+      console.error('Error creating BatchTrainer table:', error);
       throw error;
     }
   }
 };
 
 //Create batchClassSchedule
-  export const createBatchClassScheduleTableHandler = async (req: any, batchModule: BatchClassSchedule) => {
-    await createBatchClassScheduleTableIfNotExists();
-    await createBatchTrainerTableIfNotExists();
+export const createBatchClassScheduleTableHandler = async (
+  req: any,
+  batchModule: BatchClassSchedule
+) => {
+  await createBatchClassScheduleTableIfNotExists();
+  await createBatchTrainerTableIfNotExists();
 
-    const { batchId, moduleId, classId, trainerIds = [], startDate, startTime, endDate, endTime, meetingLink } = batchModule;
-    const batchClassScheduleId = uuidv4();
-    const { user } = req;
-    try {
-      // Step 1: Validate Batch Existence
-      const [batchExists] = await bigquery.query({
-        query: `
+  const {
+    batchId,
+    moduleId,
+    classId,
+    trainerIds = [],
+    startDate,
+    startTime,
+    endDate,
+    endTime,
+    meetingLink
+  } = batchModule;
+  const batchClassScheduleId = uuidv4();
+  const { user } = req;
+  try {
+    // Step 1: Validate Batch Existence
+    const [batchExists] = await bigquery.query({
+      query: `
           SELECT id FROM \`${process.env.PROJECT_ID}.${process.env.DATASET_ID}.${process.env.TABLE_BATCH}\`
           WHERE id = @batchId`,
-        params: { batchId },
-      });
+      params: { batchId }
+    });
 
-      if (batchExists.length === 0) {
-        throw new Error(`Batch with ID ${batchId} not found.`);
-      }
+    if (batchExists.length === 0) {
+      throw new Error(`Batch with ID ${batchId} not found.`);
+    }
 
-      // Step 2: Validate Module Existence
-      const [moduleExists] = await bigquery.query({
-        query: `
+    // Step 2: Validate Module Existence
+    const [moduleExists] = await bigquery.query({
+      query: `
           SELECT id FROM \`${process.env.PROJECT_ID}.${process.env.DATASET_ID}.${process.env.TABLE_MODULE}\`
           WHERE id = @moduleId`,
-        params: { moduleId },
-      });
+      params: { moduleId }
+    });
 
-      if (moduleExists.length === 0) {
-        throw new Error(`Module with ID ${moduleId} not found.`);
-      }
+    if (moduleExists.length === 0) {
+      throw new Error(`Module with ID ${moduleId} not found.`);
+    }
 
-      // Step 2: Validate Module Existence
-      const [classExit] = await bigquery.query({
-        query: `
+    // Step 2: Validate Module Existence
+    const [classExit] = await bigquery.query({
+      query: `
           SELECT id FROM \`${process.env.PROJECT_ID}.${process.env.DATASET_ID}.${process.env.TABLE_CLASS}\`
           WHERE id = @classId`,
-        params: { classId },
-      });
+      params: { classId }
+    });
 
-      if (classExit.length === 0) {
-        throw new Error(`Class with ID ${classId} not found.`);
-      }
+    if (classExit.length === 0) {
+      throw new Error(`Class with ID ${classId} not found.`);
+    }
 
-      // Step 3: Validate Trainers
-      let matchedTrainerIds: string[] = [];
-      if (trainerIds.length > 0) {
-        const [traineeResults] = await bigquery.query({
-          query: `
+    // Step 3: Validate Trainers
+    let matchedTrainerIds: string[] = [];
+    if (trainerIds.length > 0) {
+      const [traineeResults] = await bigquery.query({
+        query: `
             SELECT id FROM \`${process.env.PROJECT_ID}.${process.env.DATASET_ID}.${process.env.TABLE_USER}\`
             WHERE id IN UNNEST(@trainerIds)`,
-          params: { trainerIds },
-        });
-
-        matchedTrainerIds = traineeResults.map((row: any) => row.id);
-
-        if (matchedTrainerIds.length !== trainerIds.length) {
-          const missingTrainerIds = trainerIds.filter(
-            (id: string) => !matchedTrainerIds.includes(id)
-          );
-          throw new Error(
-            `Some trainers were not found: ${missingTrainerIds.join(", ")}`
-          );
-        }
-      };
-
-      const assignmentEndDate = new Date(endDate);
-      assignmentEndDate.setDate(assignmentEndDate.getDate() + 1); // Add 1 day
-
-      // Step 4: Insert BatchModule Data
-      await bigquery.query({
-        query: batchClassScheduleQueries.createBatchClassSchedule,
-        params: {
-          id: batchClassScheduleId,
-          batchId,
-          moduleId,
-          classId,
-          startDate,
-          startTime,
-          endDate,
-          endTime,
-          meetingLink,
-          assignmentEndDate: assignmentEndDate.toISOString(),
-          createdBy: user?.id,
-          createdAt: new Date().toISOString(),
-        },
+        params: { trainerIds }
       });
-      console.log("BatchClassSchedule created successfully:", batchClassScheduleId);
 
-      // Step 5: Bulk Insert Batch-Trainer Mappings
-      if (matchedTrainerIds.length > 0) {
-        const batchTrainerInsertData = matchedTrainerIds.map((trainerId) => ({
-          batchClassScheduleId,
-          trainerId,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        }));
+      matchedTrainerIds = traineeResults.map((row: any) => row.id);
 
-        await bigquery.query({
-          query: `
+      if (matchedTrainerIds.length !== trainerIds.length) {
+        const missingTrainerIds = trainerIds.filter(
+          (id: string) => !matchedTrainerIds.includes(id)
+        );
+        throw new Error(
+          `Some trainers were not found: ${missingTrainerIds.join(', ')}`
+        );
+      }
+    }
+
+    const assignmentEndDate = new Date(endDate);
+    assignmentEndDate.setDate(assignmentEndDate.getDate() + 1); // Add 1 day
+
+    // Step 4: Insert BatchModule Data
+    await bigquery.query({
+      query: batchClassScheduleQueries.createBatchClassSchedule,
+      params: {
+        id: batchClassScheduleId,
+        batchId,
+        moduleId,
+        classId,
+        startDate,
+        startTime,
+        endDate,
+        endTime,
+        meetingLink,
+        assignmentEndDate: assignmentEndDate.toISOString(),
+        createdBy: user?.id,
+        createdAt: new Date().toISOString()
+      }
+    });
+    console.log(
+      'BatchClassSchedule created successfully:',
+      batchClassScheduleId
+    );
+
+    // Step 5: Bulk Insert Batch-Trainer Mappings
+    if (matchedTrainerIds.length > 0) {
+      const batchTrainerInsertData = matchedTrainerIds.map((trainerId) => ({
+        batchClassScheduleId,
+        trainerId,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      }));
+
+      await bigquery.query({
+        query: `
         INSERT INTO \`${process.env.PROJECT_ID}.${process.env.DATASET_ID}.${process.env.TABLE_BATCH_TRAINER}\`
         (batchClassScheduleId, trainerId, createdAt, updatedAt)
         SELECT
@@ -256,62 +268,84 @@ const createBatchTrainerTableIfNotExists = async () => {
           FROM \`${process.env.PROJECT_ID}.${process.env.DATASET_ID}.${process.env.TABLE_BATCH_TRAINER}\` bt
           WHERE bt.batchClassScheduleId = @batchClassScheduleId AND bt.trainerId = batchTrainerInsertData.trainerId
         )`,
-          params: {
-            batchTrainerInsertData,
-            batchClassScheduleId,
-          },
-        });
-
-        console.log("Batch-Trainer linked successfully.");
-      }
-
-      // Insert Audit Log
-      const auditLogParams = {
-        id: uuidv4(),
-        entityType: "BatchClassSchedule",
-        entityId: batchClassScheduleId,
-        action: "CREATE",
-        previousData: null, // Since it's a new role, there's no previous data
-        newData: JSON.stringify({ batchClassScheduleId, batchId, moduleId, classId, startDate, startTime, endDate, endTime, meetingLink, assignmentEndDate }),
-        performedBy: user?.id,
-        CreatedAt: new Date().toISOString(),
-      };
-
-      await bigquery.query({
-        query: auditQueries.insertAuditLog,
-        params: auditLogParams,
-        types: { previousData: "STRING", newData: "STRING" },
+        params: {
+          batchTrainerInsertData,
+          batchClassScheduleId
+        }
       });
 
-      return { id: batchClassScheduleId, ...batchModule, trainerIds, assignmentEndDate };
-    } catch (error: any) {
-      console.error("Error creating BatchClassSchedule:", error.message, error);
-      throw new Error(`BatchClassSchedule creation failed: ${error.message}`);
+      console.log('Batch-Trainer linked successfully.');
     }
-  };
+
+    // Insert Audit Log
+    const auditLogParams = {
+      id: uuidv4(),
+      entityType: 'BatchClassSchedule',
+      entityId: batchClassScheduleId,
+      action: 'CREATE',
+      previousData: null, // Since it's a new role, there's no previous data
+      newData: JSON.stringify({
+        batchClassScheduleId,
+        batchId,
+        moduleId,
+        classId,
+        startDate,
+        startTime,
+        endDate,
+        endTime,
+        meetingLink,
+        assignmentEndDate
+      }),
+      performedBy: user?.id,
+      CreatedAt: new Date().toISOString()
+    };
+
+    await bigquery.query({
+      query: auditQueries.insertAuditLog,
+      params: auditLogParams,
+      types: { previousData: 'STRING', newData: 'STRING' }
+    });
+
+    return {
+      id: batchClassScheduleId,
+      ...batchModule,
+      trainerIds,
+      assignmentEndDate
+    };
+  } catch (error: any) {
+    console.error('Error creating BatchClassSchedule:', error.message, error);
+    throw new Error(`BatchClassSchedule creation failed: ${error.message}`);
+  }
+};
 
 //Getall BatchClassSchedule
 export const getAllBatchClassSchedulesHandler = async () => {
   try {
-    const [rows] = await bigquery.query({ 
-      query: batchClassScheduleQueries.getAllBatchClassSchedules 
+    const [rows] = await bigquery.query({
+      query: batchClassScheduleQueries.getAllBatchClassSchedules
     });
 
     return {
-      batchClassSchedules: rows.map(row => ({
+      batchClassSchedules: rows.map((row) => ({
         id: row.batchClassScheduleId,
-        batch: row.batchId ? { 
-          id: row.batchId, 
-          batchName: row.batchName 
-        } : null,
-        module: row.moduleId ? { 
-          id: row.moduleId, 
-          moduleName: row.moduleName 
-        } : null,
-        class: row.classId ? { 
-          id: row.classId, 
-          classTitle: row.classTitle 
-        } : null,
+        batch: row.batchId
+          ? {
+              id: row.batchId,
+              batchName: row.batchName
+            }
+          : null,
+        module: row.moduleId
+          ? {
+              id: row.moduleId,
+              moduleName: row.moduleName
+            }
+          : null,
+        class: row.classId
+          ? {
+              id: row.classId,
+              classTitle: row.classTitle
+            }
+          : null,
         startDate: row.startDate,
         startTime: row.startTime,
         endDate: row.endDate,
@@ -319,28 +353,39 @@ export const getAllBatchClassSchedulesHandler = async () => {
         meetingLink: row.meetingLink,
         assignmentEndDate: row.assignmentEndDate,
         trainers: row.trainers
-          ? row.trainers.map((trainer: { trainerId: any; firstName: any; lastName: any; }) => ({
-              id: trainer.trainerId || null,
-              firstName: trainer.firstName || null,
-              lastName: trainer.lastName || null
-            }))
+          ? row.trainers.map(
+              (trainer: { trainerId: any; firstName: any; lastName: any }) => ({
+                id: trainer.trainerId || null,
+                firstName: trainer.firstName || null,
+                lastName: trainer.lastName || null
+              })
+            )
           : [],
         assignments: row.assignments
-          ? row.assignments.map((assignment: { assignmentId: any; assignmentBatchId: any; assignmentTraineeId: any; traineeFirstName: any; traineeLastName: any; assignmentEndDate: any; }) => ({
-              id: assignment.assignmentId || null,
-              batchId: assignment.assignmentBatchId || null,
-              traineeId: assignment.assignmentTraineeId || null,
-              traineeFirstName: assignment.traineeFirstName || null,
-              traineeLastName: assignment.traineeLastName || null,
-              assignmentEndDate: assignment.assignmentEndDate || null
-            }))
+          ? row.assignments.map(
+              (assignment: {
+                assignmentId: any;
+                assignmentBatchId: any;
+                assignmentTraineeId: any;
+                traineeFirstName: any;
+                traineeLastName: any;
+                assignmentEndDate: any;
+              }) => ({
+                id: assignment.assignmentId || null,
+                batchId: assignment.assignmentBatchId || null,
+                traineeId: assignment.assignmentTraineeId || null,
+                traineeFirstName: assignment.traineeFirstName || null,
+                traineeLastName: assignment.traineeLastName || null,
+                assignmentEndDate: assignment.assignmentEndDate || null
+              })
+            )
           : []
       }))
     };
   } catch (error) {
-    console.error("Error fetching batch module schedules:", error);
+    console.error('Error fetching batch module schedules:', error);
     return {
-      message: "Error fetching batch module schedules",
+      message: 'Error fetching batch module schedules',
       error
     };
   }
@@ -349,7 +394,7 @@ export const getAllBatchClassSchedulesHandler = async () => {
 //GetBatchModule based on ID
 export const getBatchClassScheduleDetailsHandler = async (id: string) => {
   try {
-    console.log("Fetching BatchClassSchedule with ID:", id);
+    console.log('Fetching BatchClassSchedule with ID:', id);
 
     const options = {
       query: batchClassScheduleQueries.getBatchClassScheduleDetails,
@@ -359,24 +404,30 @@ export const getBatchClassScheduleDetailsHandler = async (id: string) => {
     const [rows] = await bigquery.query(options);
 
     if (rows.length === 0) {
-      throw new Error("BatchClassSchedule not found");
+      throw new Error('BatchClassSchedule not found');
     }
 
     return {
-      batchClassSchedules: rows.map(row => ({
+      batchClassSchedules: rows.map((row) => ({
         id: row.batchClassScheduleId,
-        batch: row.batchId ? { 
-          id: row.batchId, 
-          batchName: row.batchName 
-        } : null,
-        module: row.moduleId ? { 
-          id: row.moduleId, 
-          moduleName: row.moduleName 
-        } : null,
-        class: row.classId ? { 
-          id: row.classId, 
-          classTitle: row.classTitle 
-        } : null,
+        batch: row.batchId
+          ? {
+              id: row.batchId,
+              batchName: row.batchName
+            }
+          : null,
+        module: row.moduleId
+          ? {
+              id: row.moduleId,
+              moduleName: row.moduleName
+            }
+          : null,
+        class: row.classId
+          ? {
+              id: row.classId,
+              classTitle: row.classTitle
+            }
+          : null,
         startDate: row.startDate,
         startTime: row.startTime,
         endDate: row.endDate,
@@ -384,47 +435,59 @@ export const getBatchClassScheduleDetailsHandler = async (id: string) => {
         meetingLink: row.meetingLink,
         assignmentEndDate: row.assignmentEndDate,
         trainers: row.trainers
-          ? row.trainers.map((trainer: { trainerId: any; firstName: any; lastName: any; }) => ({
-              id: trainer.trainerId || null,
-              firstName: trainer.firstName || null,
-              lastName: trainer.lastName || null
-            }))
+          ? row.trainers.map(
+              (trainer: { trainerId: any; firstName: any; lastName: any }) => ({
+                id: trainer.trainerId || null,
+                firstName: trainer.firstName || null,
+                lastName: trainer.lastName || null
+              })
+            )
           : [],
         assignments: row.assignments
-          ? row.assignments.map((assignment: { assignmentId: any; assignmentBatchId: any; assignmentTraineeId: any; traineeFirstName: any; traineeLastName: any; assignmentEndDate: any; }) => ({
-              id: assignment.assignmentId || null,
-              batchId: assignment.assignmentBatchId || null,
-              traineeId: assignment.assignmentTraineeId || null,
-              traineeFirstName: assignment.traineeFirstName || null,
-              traineeLastName: assignment.traineeLastName || null,
-              assignmentEndDate: assignment.assignmentEndDate || null
-            }))
+          ? row.assignments.map(
+              (assignment: {
+                assignmentId: any;
+                assignmentBatchId: any;
+                assignmentTraineeId: any;
+                traineeFirstName: any;
+                traineeLastName: any;
+                assignmentEndDate: any;
+              }) => ({
+                id: assignment.assignmentId || null,
+                batchId: assignment.assignmentBatchId || null,
+                traineeId: assignment.assignmentTraineeId || null,
+                traineeFirstName: assignment.traineeFirstName || null,
+                traineeLastName: assignment.traineeLastName || null,
+                assignmentEndDate: assignment.assignmentEndDate || null
+              })
+            )
           : []
       }))
     };
   } catch (error) {
-    console.error("Error fetching batch module schedule details:", error);
+    console.error('Error fetching batch module schedule details:', error);
     throw error;
   }
 };
 
-
-export const getBatchClassScheduleByClassIdHandler = async (classId: string) => {
+export const getBatchClassScheduleByClassIdHandler = async (
+  classId: string
+) => {
   try {
-    console.log("Fetching BatchClassSchedule with classId:", classId);
+    console.log('Fetching BatchClassSchedule with classId:', classId);
 
     const options = {
       query: batchClassScheduleQueries.getBatchClassScheduleByClassId,
-      params: { classId },
+      params: { classId }
     };
 
     const [rows] = await bigquery.query(options);
 
     if (rows.length === 0) {
-      throw new Error("No BatchClassSchedule found for this classId");
+      throw new Error('No BatchClassSchedule found for this classId');
     }
 
-    const batchModuleClass = rows.map(row => ({
+    const batchModuleClass = rows.map((row) => ({
       id: row.batchClassScheduleId,
       batchId: row.batchId,
       moduleId: row.module?.id || null,
@@ -441,167 +504,132 @@ export const getBatchClassScheduleByClassIdHandler = async (classId: string) => 
       module: {
         id: row.module?.id || null,
         moduleName: row.module?.moduleName || null,
-        materialForModule: row.module?.materialForModule || null,
+        materialForModule: row.module?.materialForModule || null
       },
 
       class: {
         id: row.class?.id || null,
-        classTitle: row.class?.classTitle || null,
+        classTitle: row.class?.classTitle || null
       },
 
       batch: {
         id: row.batch?.id || null,
         batchName: row.batch?.batchName || null,
         startDate: row.batch?.startDate || null,
-        endDate: row.batch?.endDate || null,
+        endDate: row.batch?.endDate || null
       },
 
       trainers: row.trainers
-        ? row.trainers.map((trainer: { id: string; firstName: string; lastName: string; BatchTrainer: { batchClassScheduleId: string; trainerId: string; }; }) => ({
-            id: trainer.id,
-            firstName: trainer.firstName,
-            lastName: trainer.lastName,
-            BatchTrainer: {
-              batchClassScheduleId: trainer.BatchTrainer?.batchClassScheduleId || null,
-              trainerId: trainer.BatchTrainer?.trainerId || null,
-            },
-          }))
+        ? row.trainers.map(
+            (trainer: {
+              id: string;
+              firstName: string;
+              lastName: string;
+              BatchTrainer: { batchClassScheduleId: string; trainerId: string };
+            }) => ({
+              id: trainer.id,
+              firstName: trainer.firstName,
+              lastName: trainer.lastName,
+              BatchTrainer: {
+                batchClassScheduleId:
+                  trainer.BatchTrainer?.batchClassScheduleId || null,
+                trainerId: trainer.BatchTrainer?.trainerId || null
+              }
+            })
+          )
         : [],
 
       assignments: row.assignments
-        ? row.assignments.map((assignment: { 
-            assignmentId: string; 
-            assignmentBatchId: string; 
-            assignmentTraineeId: string; 
-            assignmentEndDate: string; 
-            traineeFirstName: string;
-            traineeLastName: string;
-          }) => ({
-            assignmentId: assignment.assignmentId,
-            batchId: assignment.assignmentBatchId,
-            traineeId: assignment.assignmentTraineeId,
-            assignmentEndDate: assignment.assignmentEndDate,
-            traineeName: `${assignment.traineeFirstName} ${assignment.traineeLastName}`,
-          }))
-        : [],
+        ? row.assignments.map(
+            (assignment: {
+              assignmentId: string;
+              assignmentBatchId: string;
+              assignmentTraineeId: string;
+              assignmentEndDate: string;
+              traineeFirstName: string;
+              traineeLastName: string;
+            }) => ({
+              assignmentId: assignment.assignmentId,
+              batchId: assignment.assignmentBatchId,
+              traineeId: assignment.assignmentTraineeId,
+              assignmentEndDate: assignment.assignmentEndDate,
+              traineeName: `${assignment.traineeFirstName} ${assignment.traineeLastName}`
+            })
+          )
+        : []
     }));
 
-    return { message: "BatchClassSchedule found", batchModuleClass };
-
+    return { message: 'BatchClassSchedule found', batchModuleClass };
   } catch (error) {
-    console.error("Error fetching batchClassSchedule by classId:", error);
+    console.error('Error fetching batchClassSchedule by classId:', error);
     throw error;
   }
 };
 
-
 //GetBatchClassSchedule by BatchId
-export const getBatchClassScheduleByBatchIdHandler = async (batchId: string) => {
+export const getBatchClassScheduleByBatchIdHandler = async (
+  batchId: string
+) => {
   try {
-    console.log("Fetching Batch Module Schedule for Batch ID:", batchId);
+    console.log('Fetching Batch Class Schedule for Batch ID:', batchId);
 
     const options = {
       query: batchClassScheduleQueries.getBatchClassScheduleByBatchId,
-      params: { batchId },
+      params: { batchId }
     };
 
     const [rows] = await bigquery.query(options);
 
     if (rows.length === 0) {
-      return { message: "Batch Module Schedule not found", batchClassSchedule: [] };
+      return {
+        message: 'Batch Class Schedule not found',
+        batchClassSchedule: []
+      };
     }
 
-    // ✅ Transform result to match expected response structure
-    // const batchClassSchedule = rows.map(row => ({
-    //   id: row.batchClassScheduleId,
-    //   batchId: row.batchId,
-    //   moduleId: row.moduleId || null,
-    //   classId: row.classId || null,
-    //   startDate: row.startDate,
-    //   startTime: row.startTime,
-    //   endDate: row.endDate,
-    //   endTime: row.endTime,
-    //   meetingLink: row.meetingLink,
-    //   createdAt: row.createdAt,
-    //   updatedAt: row.updatedAt,
-    //   module: {
-    //     id: row.module?.id || null,
-    //     moduleName: row.module?.moduleName || null,
-    //     materialForModule: row.module?.materialForModule || null
-    //   },
-    //   class: {
-    //     id: row.class?.id || null,
-    //     classTitle: row.class?.classTitle || null,
-    //   },
-    //   batch: {
-    //     id: row.batch?.id || null,
-    //     batchName: row.batch?.batchName || null,
-    //     startDate: row.batch?.startDate || null,
-    //     endDate: row.batch?.endDate || null
-    //   },
-    //   trainers: row.trainers
-    //     ? row.trainers.map((trainer: { id: any; firstName: any; lastName: any; BatchTrainer: { batchClassScheduleId: any; trainerId: any; createdAt: any; updatedAt: any; }; }) => ({
-    //       id: trainer.id,
-    //       firstName: trainer.firstName,
-    //       lastName: trainer.lastName,
-    //       BatchTrainer: {
-    //         batchClassScheduleId: trainer.BatchTrainer?.batchClassScheduleId || null,
-    //         trainerId: trainer.BatchTrainer?.trainerId || null,
-    //         createdAt: trainer.BatchTrainer?.createdAt || null,
-    //         updatedAt: trainer.BatchTrainer?.updatedAt || null
-    //       }
-    //     }))
-    //     : [],
-    //   assignments: row.assignments
-    //     ? row.assignments.map((assignment: { id: any; batchId: any; assignmentTraineeId: any; traineeFirstName: any; traineeLastName: any; assignmentEndDate: any; createdAt: any; updatedAt: any; }) => ({
-    //       id: assignment.id,
-    //       batchId: assignment.batchId,
-    //       traineeId: assignment.assignmentTraineeId,
-    //       traineeFirstName: assignment.traineeFirstName || null,  // ✅ Added Trainee First Name
-    //       traineeLastName: assignment.traineeLastName || null,    // ✅ Added Trainee Last Name
-    //       assignmentEndDate: assignment.assignmentEndDate,
-    //       createdAt: assignment.createdAt,
-    //       updatedAt: assignment.updatedAt
-    //     }))
-    //     : []
-    // }));
+    // Transform result to match expected response structure
+    const batchClassSchedule = rows.map((row) => ({
+      id: row.batchClassScheduleId || null,
+      batchId: row.batchId || null,
+      moduleId: row.moduleId || null,
+      classId: row.classId || null,
+      startDate: row.startDate || null,
+      startTime: row.startTime || null,
+      endDate: row.endDate || null,
+      endTime: row.endTime || null,
+      meetingLink: row.meetingLink || null,
+      assignmentEndDate: row.assignmentEndDate || null,
+      module: {
+        id: row.module?.id || null,
+        moduleName: row.module?.moduleName || null,
+        materialForModule: row.module?.materialForModule || null,
+        sequence: row.module?.sequence || null
+      },
+      class: {
+        id: row.class?.id || null,
+        classTitle: row.class?.classTitle || null,
+        classDescription: row.class?.classDescription || null,
+        classRecordedLink: row.class?.classRecordedLink || null,
+        materialForClass: row.class?.materialForClass || null,
+        assignmentName: row.class?.assignmentName || null,
+        assignmentFile: row.class?.assignmentFile || null,
+        totalMarks: row.class?.totalMarks || null
+      },
+      batch: {
+        id: row.batch?.id || null,
+        batchName: row.batch?.batchName || null,
+        startDate: row.batch?.startDate || null,
+        endDate: row.batch?.endDate || null
+      },
+      trainers: row.trainers || [],
+      assignments: row.assignments || []
+    }));
 
-      // Transform result to match expected response structure
-      const batchClassSchedule = rows.map(row => ({
-        id: row.batchClassScheduleId,
-        batchId: row.batchId,
-        moduleId: row.moduleId || null,
-        classId: row.classId || null,
-        startDate: row.startDate,
-        startTime: row.startTime,
-        endDate: row.endDate,
-        endTime: row.endTime,
-        meetingLink: row.meetingLink,
-        duration: null, // You might want to calculate this
-        createdAt: row.createdAt,
-        updatedAt: row.updatedAt,
-        module: {
-          id: row.module?.id || null,
-          moduleName: row.module?.moduleName || null,
-          materialForModule: row.module?.materialForModule || null
-        },
-        class: {
-          id: row.class?.id || null,
-          classTitle: row.class?.classTitle || null,
-        },
-        batch: {
-          id: row.batch?.id || null,
-          batchName: row.batch?.batchName || null,
-          startDate: row.batch?.startDate || null,
-          endDate: row.batch?.endDate || null
-        },
-        trainers: row.trainers || [],
-        assignments: row.assignments || []
-      }));
-
-    return { message: "Batch Module Schedule retrieved successfully", batchClassSchedule };
+    return {
+      batchClassSchedule
+    };
   } catch (error) {
-    console.error("Error fetching Batch Module Schedule:", error);
+    console.error('Error fetching Batch Class Schedule:', error);
     throw error;
   }
 };
@@ -624,11 +652,11 @@ export const updateBatchClassScheduleHandler = async (
         FROM \`${process.env.PROJECT_ID}.${process.env.DATASET_ID}.${process.env.TABLE_BATCH_CLASS_SCHEDULE}\`
         WHERE id = @batchClassScheduleId
       `,
-      params: { batchClassScheduleId: id },
+      params: { batchClassScheduleId: id }
     });
 
     if (existingRows.length === 0) {
-      throw new Error("BatchClassSchedule not found");
+      throw new Error('BatchClassSchedule not found');
     }
 
     const existingBatchClassSchedule = existingRows[0];
@@ -652,17 +680,25 @@ export const updateBatchClassScheduleHandler = async (
       query: batchClassScheduleQueries.updateBatchClassSchedule,
       params: {
         batchClassScheduleId: id,
-        moduleId: updateBatchModule.moduleId || existingBatchClassSchedule.moduleId,
-        classId: updateBatchModule.classId || existingBatchClassSchedule.classId,
-        startDate: updateBatchModule.startDate || existingBatchClassSchedule.startDate,
-        startTime: updateBatchModule.startTime || existingBatchClassSchedule.startTime,
-        endDate: updateBatchModule.endDate || existingBatchClassSchedule.endDate,
-        endTime: updateBatchModule.endTime || existingBatchClassSchedule.endTime,
-        meetingLink: updateBatchModule.meetingLink || existingBatchClassSchedule.meetingLink,
+        moduleId:
+          updateBatchModule.moduleId || existingBatchClassSchedule.moduleId,
+        classId:
+          updateBatchModule.classId || existingBatchClassSchedule.classId,
+        startDate:
+          updateBatchModule.startDate || existingBatchClassSchedule.startDate,
+        startTime:
+          updateBatchModule.startTime || existingBatchClassSchedule.startTime,
+        endDate:
+          updateBatchModule.endDate || existingBatchClassSchedule.endDate,
+        endTime:
+          updateBatchModule.endTime || existingBatchClassSchedule.endTime,
+        meetingLink:
+          updateBatchModule.meetingLink ||
+          existingBatchClassSchedule.meetingLink,
         assignmentEndDate: newAssignmentEndDate, // Now properly formatted as a string
         updatedBy: user?.id,
-        updatedAt: new Date().toISOString(),
-      },
+        updatedAt: new Date().toISOString()
+      }
     });
 
     // Step 4: Bulk update assignmentEndDate for all trainees in the batch
@@ -671,8 +707,8 @@ export const updateBatchClassScheduleHandler = async (
         query: batchClassScheduleQueries.bulkUpdateAssignmentEndDate,
         params: {
           batchId: existingBatchClassSchedule.batchId,
-          newAssignmentEndDate: newAssignmentEndDate,
-        },
+          newAssignmentEndDate: newAssignmentEndDate
+        }
       });
 
       console.log(
@@ -681,14 +717,20 @@ export const updateBatchClassScheduleHandler = async (
     }
 
     // Step 5: Handle trainee assignments
-    if (updateBatchModule.traineeAssignments && updateBatchModule.traineeAssignments.length > 0) {
-      console.log("Processing trainee assignments...");
+    if (
+      updateBatchModule.traineeAssignments &&
+      updateBatchModule.traineeAssignments.length > 0
+    ) {
+      console.log('Processing trainee assignments...');
 
       for (const assignment of updateBatchModule.traineeAssignments) {
         // Format the assignment end date if needed
-        const assignmentEndDateStr = typeof assignment.assignmentEndDate === 'string' 
-          ? assignment.assignmentEndDate 
-          : new Date(assignment.assignmentEndDate).toISOString().split('T')[0];
+        const assignmentEndDateStr =
+          typeof assignment.assignmentEndDate === 'string'
+            ? assignment.assignmentEndDate
+            : new Date(assignment.assignmentEndDate)
+                .toISOString()
+                .split('T')[0];
 
         // Check if assignment already exists for this batch, trainee, and class
         const [existingAssignment] = await bigquery.query({
@@ -703,8 +745,8 @@ export const updateBatchClassScheduleHandler = async (
           params: {
             batchId: existingBatchClassSchedule.batchId,
             traineeId: assignment.traineeId,
-            classId: existingBatchClassSchedule.classId,
-          },
+            classId: existingBatchClassSchedule.classId
+          }
         });
 
         if (existingAssignment.length === 0) {
@@ -722,10 +764,12 @@ export const updateBatchClassScheduleHandler = async (
               classId: existingBatchClassSchedule.classId,
               assignmentEndDate: assignmentEndDateStr,
               createdAt: new Date().toISOString(),
-              updatedAt: new Date().toISOString(),
-            },
+              updatedAt: new Date().toISOString()
+            }
           });
-          console.log(`Created new assignment record for trainee ${assignment.traineeId}`);
+          console.log(
+            `Created new assignment record for trainee ${assignment.traineeId}`
+          );
         } else {
           // Update existing assignment
           await bigquery.query({
@@ -744,8 +788,8 @@ export const updateBatchClassScheduleHandler = async (
               traineeId: assignment.traineeId,
               classId: existingBatchClassSchedule.classId,
               assignmentEndDate: assignmentEndDateStr,
-              updatedAt: new Date().toISOString(),
-            },
+              updatedAt: new Date().toISOString()
+            }
           });
           console.log(`Updated assignment for trainee ${assignment.traineeId}`);
         }
@@ -753,8 +797,11 @@ export const updateBatchClassScheduleHandler = async (
     }
 
     // Step 6: Handle trainer assignments (only if trainerIds are provided)
-    if (updateBatchModule.trainerIds && updateBatchModule.trainerIds.length > 0) {
-      console.log("Updating trainer mappings...");
+    if (
+      updateBatchModule.trainerIds &&
+      updateBatchModule.trainerIds.length > 0
+    ) {
+      console.log('Updating trainer mappings...');
 
       // Delete existing batch-trainer relationships
       await bigquery.query({
@@ -762,7 +809,7 @@ export const updateBatchClassScheduleHandler = async (
           DELETE FROM \`${process.env.PROJECT_ID}.${process.env.DATASET_ID}.${process.env.TABLE_BATCH_TRAINER}\`
           WHERE batchClassScheduleId = @batchClassScheduleId
         `,
-        params: { batchClassScheduleId: id },
+        params: { batchClassScheduleId: id }
       });
 
       // Validate trainer IDs
@@ -772,12 +819,12 @@ export const updateBatchClassScheduleHandler = async (
           FROM \`${process.env.PROJECT_ID}.${process.env.DATASET_ID}.${process.env.TABLE_USER}\`
           WHERE id IN UNNEST(@trainerIds)
         `,
-        params: { trainerIds: updateBatchModule.trainerIds },
+        params: { trainerIds: updateBatchModule.trainerIds }
       });
 
       const matchedTrainerIds = validTrainers.map((row: any) => row.id);
       if (matchedTrainerIds.length !== updateBatchModule.trainerIds.length) {
-        throw new Error("Some trainerIds were not found.");
+        throw new Error('Some trainerIds were not found.');
       }
 
       // Insert new trainers
@@ -796,8 +843,8 @@ export const updateBatchClassScheduleHandler = async (
           batchClassScheduleId: id,
           trainerIds: matchedTrainerIds,
           createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        },
+          updatedAt: new Date().toISOString()
+        }
       });
     }
 
@@ -806,20 +853,27 @@ export const updateBatchClassScheduleHandler = async (
       query: auditQueries.insertAuditLog,
       params: {
         id: uuidv4(),
-        entityType: "BatchClassSchedule",
+        entityType: 'BatchClassSchedule',
         entityId: id,
-        action: "UPDATE",
+        action: 'UPDATE',
         previousData: JSON.stringify(existingBatchClassSchedule),
-        newData: JSON.stringify({ ...updateBatchModule, assignmentEndDate: newAssignmentEndDate }),
+        newData: JSON.stringify({
+          ...updateBatchModule,
+          assignmentEndDate: newAssignmentEndDate
+        }),
         performedBy: user?.id,
-        createdAt: new Date().toISOString(),
+        createdAt: new Date().toISOString()
       },
-      types: { previousData: "STRING", newData: "STRING" },
+      types: { previousData: 'STRING', newData: 'STRING' }
     });
 
     console.log(`BatchClassSchedule with ID ${id} updated successfully.`);
 
-    return { id, ...updateBatchModule, assignmentEndDate: newAssignmentEndDate };
+    return {
+      id,
+      ...updateBatchModule,
+      assignmentEndDate: newAssignmentEndDate
+    };
   } catch (error) {
     console.error(`Error updating batchClassSchedule ${id}:`, error);
     throw error;
@@ -829,13 +883,13 @@ export const updateBatchClassScheduleHandler = async (
 //DeleteBatchClassSchedule
 export const deleteBatchClassScheduleHandler = async (id: string, req: any) => {
   if (!id) {
-    throw new Error("BatchClassSchedule ID is required");
+    throw new Error('BatchClassSchedule ID is required');
   }
 
   const exist = await checkBatchClassScheduleTableExists();
   if (!exist) {
-    console.error("BatchClassSchedule table does not exist");
-    throw new Error("BatchClassSchedule table does not exist");
+    console.error('BatchClassSchedule table does not exist');
+    throw new Error('BatchClassSchedule table does not exist');
   }
 
   const { user } = req;
@@ -853,7 +907,7 @@ export const deleteBatchClassScheduleHandler = async (id: string, req: any) => {
     });
 
     if (!existingRecords.length) {
-      throw new Error("BatchClassSchedule not found");
+      throw new Error('BatchClassSchedule not found');
     }
 
     const existingData = existingRecords[0];
@@ -872,7 +926,7 @@ export const deleteBatchClassScheduleHandler = async (id: string, req: any) => {
     // Step 1: Delete batch-trainers mappings first
     await bigquery.query({
       query: batchTrainerQueries.deleteBatchTrainer,
-      params: { batchClassScheduleId: id }, // ✅ Ensure parameter consistency
+      params: { batchClassScheduleId: id } // ✅ Ensure parameter consistency
     });
 
     // Step 2: Delete the BatchClassSchedule
@@ -886,27 +940,27 @@ export const deleteBatchClassScheduleHandler = async (id: string, req: any) => {
     // Step 3: Insert Audit Log
     const auditLogParams = {
       id: uuidv4(),
-      entityType: "BatchClassSchedule",
+      entityType: 'BatchClassSchedule',
       entityId: id,
-      action: "DELETE",
+      action: 'DELETE',
       previousData: JSON.stringify(existingData),
       newData: null,
-      performedBy: user?.id || "SYSTEM",
-      createdAt: new Date().toISOString(),
+      performedBy: user?.id || 'SYSTEM',
+      createdAt: new Date().toISOString()
     };
 
-    console.log("Audit Log Params:", auditLogParams);
+    console.log('Audit Log Params:', auditLogParams);
 
     await bigquery.query({
       query: auditQueries.insertAuditLog,
       params: auditLogParams,
       types: {
-        previousData: "STRING",
-        newData: "STRING",
-      },
+        previousData: 'STRING',
+        newData: 'STRING'
+      }
     });
 
-    console.log("Audit Log inserted successfully.");
+    console.log('Audit Log inserted successfully.');
   } catch (error) {
     console.error(`Error deleting BatchClassSchedule with ID ${id}:`, error);
     throw error;

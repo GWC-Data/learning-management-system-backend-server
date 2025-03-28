@@ -112,6 +112,8 @@ export declare const getBatchClassScheduleByClassIdHandler: (classId: string) =>
 }>;
 export declare const getBatchClassScheduleByBatchIdHandler: (batchId: string) => Promise<{
     message: string;
+    batchClassSchedule: never[];
+} | {
     batchClassSchedule: {
         id: any;
         batchId: any;
@@ -122,17 +124,22 @@ export declare const getBatchClassScheduleByBatchIdHandler: (batchId: string) =>
         endDate: any;
         endTime: any;
         meetingLink: any;
-        duration: null;
-        createdAt: any;
-        updatedAt: any;
+        assignmentEndDate: any;
         module: {
             id: any;
             moduleName: any;
             materialForModule: any;
+            sequence: any;
         };
         class: {
             id: any;
             classTitle: any;
+            classDescription: any;
+            classRecordedLink: any;
+            materialForClass: any;
+            assignmentName: any;
+            assignmentFile: any;
+            totalMarks: any;
         };
         batch: {
             id: any;
@@ -143,6 +150,7 @@ export declare const getBatchClassScheduleByBatchIdHandler: (batchId: string) =>
         trainers: any;
         assignments: any;
     }[];
+    message?: undefined;
 }>;
 export declare const updateBatchClassScheduleHandler: (req: any, id: string, updateBatchModule: Partial<BatchClassSchedule>) => Promise<{
     assignmentEndDate: any;

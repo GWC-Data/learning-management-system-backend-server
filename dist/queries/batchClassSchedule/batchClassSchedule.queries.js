@@ -129,37 +129,45 @@ CAST(bms.endDate AS STRING) AS endDate,
 CAST(bms.endTime AS STRING) AS endTime,
 bms.meetingLink,
 bms.assignmentEndDate,
-CAST(bms.createdAt AS STRING) AS createdAt,
-CAST(bms.updatedAt AS STRING) AS updatedAt,
 
 -- Fetching module details
 STRUCT(
-    COALESCE(m.id, '') AS id,
-    COALESCE(m.moduleName, '') AS moduleName,
-    COALESCE(m.materialForModule, '') AS materialForModule
+    IFNULL(NULLIF(CAST(m.id AS STRING), '0'), '') AS id,
+    IFNULL(m.moduleName, '') AS moduleName,
+    IFNULL(m.materialForModule, '') AS materialForModule,
+    IFNULL(NULLIF(CAST(m.sequence AS STRING), '0'), '') AS sequence
 ) AS module,
 
 -- Fetching batch details
 STRUCT(
-    b.id AS id,
-    b.batchName AS batchName,
-    CAST(b.startDate AS STRING) AS startDate,
-    CAST(b.endDate AS STRING) AS endDate
+    IFNULL(NULLIF(CAST(b.id AS STRING), '0'), '') AS id,
+    IFNULL(b.batchName, '') AS batchName,
+    IFNULL(CAST(b.startDate AS STRING), '') AS startDate,
+    IFNULL(CAST(b.endDate AS STRING), '') AS endDate
 ) AS batch,
 
 -- Fetching class details
 STRUCT(
-    COALESCE(c.id, '') AS id,
-    COALESCE(c.classTitle, '') AS classTitle
+    IFNULL(NULLIF(CAST(c.id AS STRING), '0'), '') AS id,
+    IFNULL(c.classTitle, '') AS classTitle,
+    IFNULL(c.classDescription, '') AS classDescription,
+    IFNULL(c.classRecordedLink, '') AS classRecordedLink,
+    IFNULL(c.materialForClass, '') AS materialForClass,
+    IFNULL(c.assignmentName, '') AS assignmentName,
+    IFNULL(c.assignmentFile, '') AS assignmentFile,
+    IFNULL(NULLIF(CAST(c.totalMarks AS STRING), '0'), '') AS totalMarks
 ) AS class,
 
 -- Fetching trainers with a subquery
 (
     SELECT ARRAY_AGG(STRUCT(
-        u.id AS id,
-        u.firstName AS firstName,
-        u.lastName AS lastName,
-        STRUCT(bt.batchClassScheduleId AS batchClassScheduleId, bt.trainerId AS trainerId) AS BatchTrainer
+        IFNULL(NULLIF(CAST(u.id AS STRING), '0'), '') AS id,
+        IFNULL(u.firstName, '') AS firstName,
+        IFNULL(u.lastName, '') AS lastName,
+        STRUCT(
+            IFNULL(bt.batchClassScheduleId, '') AS batchClassScheduleId, 
+            IFNULL(NULLIF(CAST(bt.trainerId AS STRING), '0'), '') AS trainerId
+        ) AS BatchTrainer
     ))
     FROM \`${process.env.PROJECT_ID}.${process.env.DATASET_ID}.${process.env.TABLE_BATCH_TRAINER}\` bt
     LEFT JOIN \`${process.env.PROJECT_ID}.${process.env.DATASET_ID}.${process.env.TABLE_USER}\` u 
@@ -170,12 +178,12 @@ STRUCT(
 -- Fetching assignments with a subquery
 (
     SELECT ARRAY_AGG(STRUCT(
-        ass.id AS assignmentId,
-        ass.batchId AS assignmentBatchId,
-        ass.traineeId AS assignmentTraineeId,
-        u.firstName AS traineeFirstName,
-        u.lastName AS traineeLastName,
-        ass.assignmentEndDate AS assignmentEndDate
+        IFNULL(NULLIF(CAST(ass.id AS STRING), '0'), '') AS assignmentId,
+        IFNULL(NULLIF(CAST(ass.batchId AS STRING), '0'), '') AS assignmentBatchId,
+        IFNULL(NULLIF(CAST(ass.traineeId AS STRING), '0'), '') AS assignmentTraineeId,
+        IFNULL(u.firstName, '') AS traineeFirstName,
+        IFNULL(u.lastName, '') AS traineeLastName,
+        IFNULL(ass.assignmentEndDate, '') AS assignmentEndDate
     ))
     FROM \`${process.env.PROJECT_ID}.${process.env.DATASET_ID}.${process.env.TABLE_ASSIGNMENT}\` ass
     LEFT JOIN \`${process.env.PROJECT_ID}.${process.env.DATASET_ID}.${process.env.TABLE_USER}\` u
@@ -193,10 +201,10 @@ WHERE bms.batchId = @batchId
 GROUP BY 
   bms.id, bms.batchId, bms.moduleId, bms.classId, bms.startDate, bms.startTime, 
   bms.endDate, bms.endTime, bms.meetingLink, bms.assignmentEndDate, 
-  bms.createdAt, bms.updatedAt, 
-  m.id, m.moduleName, m.materialForModule, 
+  m.id, m.moduleName, m.materialForModule, m.sequence, 
   b.id, b.batchName, b.startDate, b.endDate,
-  c.id, c.classTitle
+  c.id, c.classTitle, c.classDescription, c.classRecordedLink, c.materialForClass, c.assignmentName,
+  c.assignmentFile, c.totalMarks
 `,
   getBatchClassScheduleByClassId: `
  WITH UniqueTrainers AS (
