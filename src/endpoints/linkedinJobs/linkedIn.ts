@@ -231,6 +231,7 @@ export const updateCarrierPathLinkByIdEndpoint = new Endpoint({
   handler: async (req, res): Promise<void> => {
     try {
       const updateCarrierPathLink = await updateCarrierPathLinkJobHandler(
+        req,
         req.params.id,
         req.body
       );

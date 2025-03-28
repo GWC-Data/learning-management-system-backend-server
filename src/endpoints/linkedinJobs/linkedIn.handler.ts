@@ -774,12 +774,13 @@ export const updateLinkedInJobHandler = async (
 
 //Update CarrierPath Link
 export const updateCarrierPathLinkJobHandler = async (
+  req: any,
   id: string,
   updatedData: Partial<LinkedIn>
 ) => {
   try {
     console.log(`Updating carrierPathLink for Job ID: ${id}`);
-
+    const { user } = req;
     // Check if the table exists
     if (!(await checkLinkedInTableExists())) {
       return {
@@ -809,8 +810,12 @@ export const updateCarrierPathLinkJobHandler = async (
 
     // Update only carrierPathLink
     await bigquery.query({
-      query: `UPDATE \`teqcertify.lms.${TABLE_LINKEDIN_JOBS}\` SET carrierPathLink = @carrierPathLink WHERE id = @id`,
-      params: { id, carrierPathLink: updatedData.carrierPathLink }
+      query: `UPDATE \`teqcertify.lms.${TABLE_LINKEDIN_JOBS}\` SET carrierPathLink = @carrierPathLink, updatedBy = @updatedBy WHERE id = @id`,
+      params: {
+        id,
+        carrierPathLink: updatedData.carrierPathLink,
+        updatedBy: user?.id || null
+      }
     });
 
     console.log(`Updated carrierPathLink for Job ID ${id}.`);
